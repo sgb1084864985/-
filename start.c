@@ -21,7 +21,7 @@
 /*全局变量*/
 static double ButtonInterval = 1;// 主界面按钮间距
 static char* Title = "小型算法流程图绘制工具";// 主界面标题
-static char* Author = " This Program Is Written By xxx. ZJU 2020 Summer";// 作者信息字符串，互评阶段部分屏蔽
+static char* Author = " This Program Is Written By Zhu Lizhen, Yan Tianming and Bao Dezheng. ZJU 2020 Summer";// 作者信息字符串，互评阶段部分屏蔽
 enum __page { StartPage_, SavePage_, DrawPage_, HelpPage_, ExamplePage_, LoadPage_, LastPage_ };// 枚举类型定义所有界面
 
 /*

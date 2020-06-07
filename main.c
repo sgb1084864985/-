@@ -33,7 +33,7 @@ static bool isBlink = FALSE;
 
 /*全局变量*/
 static double winwidth, winheight;
-static int isButton, TextBlink, TextContinue, isFrame, EditText,CurrentMode,sbutton,istext,switchtext;
+static int isButton, TextBlink, TextContinue, isFrame, EditText,CurrentMode,sbutton,istext,switchtext=1;
 static node* prehead, * p, * copytemp;							//头指针，当前对象指针，剪贴版指针
 static text* pretext, * tt;
 static cline* cl;                                               //连接线头指针
@@ -43,14 +43,14 @@ char __filename[100] = "new.dat";
 //For MenuProcess
 static double cx, cy, prex, prey, premx, premy;
 static int textdir, newflag1 = 0, newflag2, newtext, textmove, textzoom,
-dir, flag, linemove, aline, isline, isdraw, linezoom,
-zoom, zoomdir, ismove, isrotate, newflag3;
+dir, flag, linemove, aline, isline=1, isdraw, linezoom,
+zoom, zoomdir, ismove, isrotate, newflag3,InsertLine, linewholemove, autoalign__ = 1, autosave = 1, unsave = 1, newfile = 1, MenuChanged = 1;
 node* temppl;
 static line* pre, * head, * tl;
 static node* pl = NULL;
-static text* qt = NULL;
+static text* qt = NULL,*copytext,*temptext;
 double mx, my;
-int MenuChanged = 1;
+static cline* CurLine, * LineHead, * templine,*copyline;
 FILE* tempfp;
 
 //____________________________________________________________________________________________________
@@ -65,7 +65,7 @@ enum __page DrawMenuProcess();
 void KeyboardEventProcess(int key, int event);
 void Default_Color_Define();
 int DrawMode_Mouse_Process(int x, int y, int button, int event);
-int Display_Draw(node* head, node* p, text* t,text* tt);
+int Display_Draw(node* head, node* p, text* t, text* tt, cline* LineHead, cline* presn_line);
 int DrawMode_Time_Process(int timerID);
 void TimerEventProcess(int timerID);
 void cancelTimer(int id);
@@ -78,15 +78,6 @@ void startTimer(int id, int timeinterval);
 	tt->show = 0;\
 	cancelTimer(TIME4_BLINK);\
 }
-
-void WhereToExit(void) {
-	FILE* fp = fopen("ExitInfo", "w");
-	char buf[100];
-	sprintf(buf,"%s %d", __FILE__, __LINE__);
-	fputs(buf, fp);
-	fclose(fp);
-}
-
 /*函数实现*/
 
 /*
@@ -128,8 +119,12 @@ void Main() {
 
 	pretext->next = NULL;
 
-	cl = (cline*)malloc(sizeof(cline));
-	assert(cl);
+	LineHead = (cline*)malloc(sizeof(cline));
+	assert(LineHead);
+
+	LineHead->next = NULL;
+
+	CurLine = NULL;
 
 	SI.filename = __filename;
 	SI.PresentObject = p;
@@ -145,8 +140,6 @@ void Main() {
 	registerTimerEvent(TimerEventProcess);  //定时器
 
 	Music(2);
-
-	atexit(WhereToExit);
 
 	Display();
 }
@@ -172,26 +165,25 @@ void Display() {
 	
 	switch (Page) {
 	case DrawPage_:
-		Page = Display_Draw(prehead, p, pretext,tt);
+		Page = Display_Draw(prehead, p, pretext,tt,LineHead,CurLine);
 		break;
 	case StartPage_:
 		Page = Display_Start(winwidth, winheight);
 		break;
 	case HelpPage_:
-		//printf("Run to here: %s %d\n", __FILE__, __LINE__);
 		Page = Display_Help(winwidth, winheight);
 		break;
 	case ExamplePage_:
 		Page = Display_Example();
 		break;
 	case SavePage_:
-		Page = Display_Save(winwidth, winheight, __filename, prehead, pretext);
+		Page = Display_Save(winwidth, winheight, __filename, prehead, pretext,LineHead);
 		break;
 	case LoadPage_:
-		Page = Display_Load(winwidth, winheight,prehead, pretext, __filename);
+		Page = Display_Load(winwidth, winheight,prehead, pretext, LineHead,__filename);
 		break;
 	default:
-		ExitGraphics();
+		Close(prehead, pretext, LineHead);
 	}
 
 	winwidth = GetWindowWidth();
@@ -237,7 +229,7 @@ void MouseEventProcess(int x, int y, int button, int event) {
 	case LoadPage_:
 		break;
 	default:
-		ExitGraphics();
+		Close(prehead, pretext, LineHead);
 	}
 }
 
@@ -277,7 +269,7 @@ void TimerEventProcess(int timerID)
 	case LoadPage_:
 		break;
 	default:
-		ExitGraphics();
+		Close(prehead, pretext, LineHead);
 	}
 	Display();
 }
@@ -393,21 +385,24 @@ void Default_Color_Define() {
  * 状态球以及图形、文本、
  * 连接线的显示。
  */
-int Display_Draw(node* head, node* p, text* t,text* tt) {
-
+int Display_Draw(node* head, node* p, text* t, text* tt, cline* LineHead, cline* presn_line) {
 	enum __page result;
 
 	DrawList(head);
 
+	Lines_Draw(LineHead,CurLine);
+
 	if (p != head)Drawedge(p);
 
-	DisplayText(t,tt);
+	SetFont("宋体");
+
+	DisplayText(t, tt);
 
 	DrawMenu(winwidth, winheight);
 
 	DrawIconButton(winwidth, winheight);
 
-	result=DrawMenuProcess();
+	result = DrawMenuProcess();
 
 	DrawStatusBar(&SI, winwidth, winheight);
 
@@ -430,14 +425,12 @@ int Display_Draw(node* head, node* p, text* t,text* tt) {
  * 拉伸等。
  */
 int DrawMode_Mouse_Process(int x, int y, int button, int event) {
-
 	mx = ScaleXInches(x); //pixels --> inches
 	my = ScaleYInches(y); //pixels --> inches
 
 	SI.mouseX = mx;
 	SI.mouseY = my;
 
-	
 	switch (event) {
 	case BUTTON_DOWN:
 
@@ -500,73 +493,84 @@ int DrawMode_Mouse_Process(int x, int y, int button, int event) {
 
 
 			if (isline) {
-				if (!isdraw && (temppl = SearchLine(prehead, mx, my))) {  //重复搜索，无效率
-					pl = temppl;
+				if (!isdraw && (templine = SearchLine(LineHead, mx, my))) {  
+					CurLine = templine;
 					linezoom = 1;
-					SI.PresentObject = pl;
+					SI.PresentLine = CurLine;
 					SI.type = 1;
 					CurrentMode = LINE;
+					ChangeMode(3);
 					break;
 				}
-				if (!isdraw && (temppl = TrvealLine(prehead, mx, my))) { //重复搜索，无效率
-					pl = temppl;
-					tl = Trveal(pl->cl, mx, my);
-					if (tl && tl != pl->cl->begin) {
-						linemove = 1;
+				if (!isdraw && (templine = TrvealLine(LineHead, mx, my))) { 
+					CurLine = templine;
+					tl = Trveal(CurLine, mx, my);
+					if (tl) {
+						if (tl != CurLine->begin) {
+							linemove = 1;
+						}
+						else {
+							linewholemove = 1;
+							premx = mx;
+							premy = my;
+						}
+						SI.PresentLine = CurLine;
+						SI.type = 1;
+						CurrentMode = LINE;
+						ChangeMode(3);
 					}
-					SI.PresentObject = pl;
-					SI.type = 1;
-					CurrentMode = LINE;
 					break;
 				}
 
-				int linedir = JudgeEdge(p, mx, my);
+				if (InsertLine) {
+					InsertLine = 0;
+					CurLine = NULL;
+					SI.type = 3;
+					CurLine = (cline*)malloc(sizeof(cline));
+					memset(CurLine, 0, sizeof(*CurLine));
 
-				if (p && p->cl == NULL && (linedir == left || linedir == right || linedir == down)) {
-					p->cl = (cline*)malloc(sizeof(cline));
-					memset(p->cl, 0, sizeof(p->cl));
-					p->cl->blineangle = linedir; //函数重复调用，效率低下（line 374)；JudgeEdge(p, mx, my) 建议改为linedir(已改）
 					isdraw = 1;
 					cx = mx; cy = my;
 					prex = cx; prey = cy;
 					head = (line*)malloc(sizeof(line));
-					if (head == NULL) assert(head);
+					assert(head);
 					pre = head;
-					head->before = NULL;
+					head->before = NULL;  //assert(head) 保证指针非空
 					head->next = NULL;
 					head->bx = mx;
-					head->ey = my;
+					head->by = my;
 					head->ex = mx;
 					head->ey = my;
-					if (linedir == left || linedir == right) head->dir = xaxs; //标记为未操作状态
-					else head->dir = yaxs;
 
-					p->cl->begin = head;  //增加
-					p->cl->end = pre;
-					p->cl->color = Red;
-					p->cl->size = 1;
-					p->cl->solid = 1;
-					p->cl->erase = 0;     //到此
-					p->cl->num = 1;
+
+					CurLine->begin = head;  //增加
+					CurLine->end = pre;
+					CurLine->color = Red;
+					CurLine->size = 1;
+					CurLine->solid = 1;
+					CurLine->erase = 0;    
+					CurLine->num = 1;
 
 					flag = 1;
 
-					SI.PresentObject = p;
-					SI.type = 1;
+					AddCline(LineHead, CurLine);
+
 					CurrentMode = LINE;
+					ChangeMode(3);
 					break;
 				}
 			}
 
 			if (!ismove) {
 				if (temppl = Search(prehead, mx, my)) {
-					p = temppl;  //重复搜索，无效率
+					p = temppl; 
 					ismove = 1;
 					premx = mx;
 					premy = my;
 					SI.PresentObject = p;
 					SI.type = 0;
 					CurrentMode = GRAPH;
+					ChangeMode(2);
 					break;
 				}
 			}
@@ -578,6 +582,7 @@ int DrawMode_Mouse_Process(int x, int y, int button, int event) {
 					SI.PresentObject = p;
 					SI.type = 0;
 					CurrentMode = GRAPH;
+					ChangeMode(2);
 					break;
 				}
 
@@ -625,7 +630,6 @@ int DrawMode_Mouse_Process(int x, int y, int button, int event) {
 						}
 						break;
 					}
-					/*ChangeMode(4);*/  //暂时累赘，试禁用
 					EditText = 1;
 					startTimer(TIME4_BLINK, 200);
 				}
@@ -646,9 +650,50 @@ int DrawMode_Mouse_Process(int x, int y, int button, int event) {
 
 			if (linezoom)linezoom = 0;
 
+			if (linewholemove) { 
+				if (autoalign__) {
+					temppl = prehead->next;
+					while (temppl) {
+						dir = JudgeEdge(temppl, CurLine->begin->bx, CurLine->begin->by);
+						switch (dir) {
+						case right:
+							MoveWholeLine(CurLine, temppl->cx + temppl->width / 2 * cos(pi * temppl->angle / 180) - CurLine->begin->bx, temppl->cy + temppl->width / 2 * sin(pi * temppl->angle / 180) - CurLine->begin->by);
+							break;
+						case left:
+							MoveWholeLine(CurLine, temppl->cx - temppl->width / 2 * cos(pi * temppl->angle / 180) - CurLine->begin->bx, temppl->cy - temppl->width/ 2 * sin(pi * temppl->angle / 180) - CurLine->begin->by);
+							break;
+						case down:
+							MoveWholeLine(CurLine, temppl->cx - temppl->height / 2 * cos(pi * (temppl->angle+90) / 180) - CurLine->begin->bx, temppl->cy - temppl->height/ 2 * sin(pi * (temppl->angle + 90) / 180) - CurLine->begin->by);
+							break;
+						case ROTATE:
+							MoveWholeLine(CurLine, temppl->cx + temppl->height / 2 * cos(pi * (temppl->angle + 90) / 180) - CurLine->begin->bx, temppl->cy + temppl->height / 2 * sin(pi * (temppl->angle + 90) / 180) - CurLine->begin->by);
+							break;
+						default: break;
+						}
+						if (dir) break;
+						temppl = temppl->next;
+					}
+				}
+				linewholemove = 0; 
+			}
+
 			if (isline && isdraw) {
 
-				JudgeConnect(prehead, p);//作用存疑
+				if (pre->before == NULL) {
+					if (fabs(pre->bx - pre->ex) < .2 || fabs(pre->by - pre->ey) < .2) {
+						templine = LineHead;
+						while (templine) {
+							if (templine->next == CurLine) {
+								templine->next = CurLine->next;
+								break;
+							}
+							templine = templine->next;
+						}
+						CLine_Destroy(CurLine);
+						CurLine = NULL;
+						SI.type = 3;
+					}
+				}
 
 				isdraw = 0;
 			}
@@ -706,77 +751,77 @@ int DrawMode_Mouse_Process(int x, int y, int button, int event) {
 
 			if (isrotate) {
 				Rotate(p, mx, my);
-				/*DisplayClear();
-				Display();*/
-				//Drawedge(p);      //想办法将绘制函数都放在display中
 			}
 
 		case LINE:
 			if (isline) {
 
 				if (linemove) {
-					if (pl->connect && tl == pl->cl->end)
-						break;
 
-					JudgeConnect(prehead, pl);
-
-					/*	DisplayClear();
-						cl->erase = 1;*/
 					MoveLine(tl, mx, my);
 
 					break;
 				}
 				if (linezoom) {
-					if (pl->connect)
-						break;
 
-					JudgeConnect(prehead, pl);
-
-					ZoomLine(pl->cl->end, mx, my);
+					ZoomLine(CurLine->end, mx, my);
 
 					break;
 				}
+				if (linewholemove) {
+					MoveWholeLine(CurLine, mx - premx, my - premy);
+					premx = mx;
+					premy = my;
+					break;
+				}
+
 				if (isdraw) {
 
-					if (dir == yaxs) {
-						if (dir != Judge(dir, pre, mx, my) && flag == 0) {
+					if (flag==1) {
+						if (fabs(mx - prex) > fabs(my - prey)) {
 							dir = xaxs;
-							cy = prey;
-							/*		if (pre == head && pre->dir == 0) {
-										pre->dir = dir;
-										pre->bx = pre->ex;
-										pre->by = pre->ey;
-										pre->ex = mx;
-										pre->ey = my;
-									}*/
-									/*else */
-							pre = AddLine(dir, pre, cx, cy);
-							p->cl->end = pre;
-							p->cl->num++;
+							pre->dir = dir;
+							pre->ey = my;
 						}
 						else {
-							pre->ey = my;
-							flag = 0;
+							dir = yaxs;
+							pre->dir = dir;
+							pre->ex = mx;
 						}
+						flag = 0;
 					}
 					else {
-						if (dir != Judge(dir, pre, mx, my) && flag == 0) {
-							dir = yaxs;
-							cx = prex;
-							pre = AddLine(dir, pre, cx, cy);
-							p->cl->end = pre;
-							p->cl->num++;
+						if (dir == yaxs) {
+							if (dir != Judge(dir, pre, mx, my) && flag == 0) {
+								dir = xaxs;
+								cy = prey;
+								pre = AddLine(dir, pre, cx, cy);
+								CurLine->end = pre;
+								CurLine->num++;
+							}
+							else {
+								pre->ey = my;
+								
+							}
 						}
 						else {
-							pre->ex = mx;
-							flag = 0;
+							if (dir != Judge(dir, pre, mx, my) && flag == 0) {
+								dir = yaxs;
+								cx = prex;
+								pre = AddLine(dir, pre, cx, cy);
+								CurLine->end = pre;
+								CurLine->num++;
+							}
+							else {
+								pre->ex = mx;
+							}
 						}
 					}
 					prex = mx; prey = my;
 				}
 			}
-			break;
 		}
+		break;
 	}
 	return DrawPage_;
 }
@@ -824,73 +869,187 @@ int DrawMode_Time_Process(int timerID) {
 enum __page DrawMenuProcess() {
 	sbutton = GetSelection();
 
+	if (sbutton && (EditText || istext)&&(sbutton<40||sbutton>50)) EditTextCancel
+
 	switch (sbutton) {
 	case 11:
-		_Destroy(prehead, pretext);
+		if (prehead->next == NULL && pretext->next == NULL && LineHead->next == NULL) break;
+		unsave = 1;
+		newfile = 1;
+		_Destroy(prehead, pretext, LineHead);
 		strcpy(__filename, "new.dat");
 		break;
 	case 12:
+		unsave = 1;
 		return LoadPage_;
-	case 13:
-
-		if (tempfp = fopen(__filename, "rb")) {
+	case 13://保存
+		if (prehead->next == NULL && pretext->next == NULL && LineHead->next == NULL) break;
+		if (!newfile&&(tempfp = fopen(__filename, "rb"))) {
+			unsave = 0;
 			fclose(tempfp);
-			if (strcmp("new.dat", __filename)) {
-				Save(__filename, prehead, pretext, GetListLen(prehead), 0);
-				break;
-			}
+			Save(__filename, prehead, pretext, LineHead, GetListLen(prehead), 0);
+			break;
 		}
 		//如果文件不存在，则转到case14,转入另存为界面
-	case 14:
+	case 14://另存为
+		if (prehead->next == NULL && pretext->next == NULL && LineHead->next == NULL) break;
 		return SavePage_;
 	case 15:
-		return StartPage_;
 	case 16:
-		_Destroy(prehead, pretext);
+		if (prehead->next || pretext->next  || LineHead->next)
+		{
+			if (unsave && autosave) {
+				unsave = 0;
+				if (!newfile&&(tempfp = fopen(__filename, "rb"))) {
+					fclose(tempfp);
+					Save(__filename, prehead, pretext, LineHead, GetListLen(prehead), 0);
+					unsave = 1;
+					_Destroy(prehead, pretext, LineHead);
+					if (sbutton == 15) return StartPage_;
+					break;
+				}
+				else {
+					newfile = 0;
+					return SavePage_;
+				}
+			}
+			else {
+				unsave = 1;
+				_Destroy(prehead, pretext, LineHead);
+			}
+		}
+		if (sbutton == 15) return StartPage_;
 		break;
 	case 17:
-		Close(prehead, pretext);
+		if (unsave && autosave&&(prehead->next || pretext->next || LineHead->next)) {
+			unsave = 0;
+			if (!newfile&&(tempfp = fopen(__filename, "rb"))) {
+				fclose(tempfp);
+				Save(__filename, prehead, pretext, LineHead, GetListLen(prehead), 0);
+				Close(prehead, pretext, LineHead);
+				break;
+			}
+			else {
+				return SavePage_;
+			}
+		}
+		else {
+			Close(prehead, pretext, LineHead);
+		}
 		break;
 	case 21:
 		//copy
-		if (SI.type == 0 || p) {
-			if (copytemp) free(copytemp);
+		switch (CurrentMode) {
+		case _TEXT:
+			if (tt == NULL) break;
+			if (copytext) {
+				free(copytext);
+				copytext = NULL;
+			}
+			copytext = CopyText(tt);
+			break;
+		case GRAPH:
+			if (p == NULL) break;
+			if (copytemp) {
+				free(copytemp);
+				copytemp = NULL;
+			}
 			copytemp = Copy(p);
+			break;
+		case LINE:
+			if (CurLine) {
+				if (copyline) {
+					free(copyline);
+					copyline = NULL;
+				}
+				copyline = CopyLine(CurLine);
+				break;
+			}
 		}
 		break;
 	case 22:
 		//paste
-		if (copytemp) {
-			temppl = Copy(copytemp);
-			Create(prehead, temppl);
-			p = temppl;
+		switch (CurrentMode) {
+		case _TEXT:
+			if (copytext) {
+				temptext = CopyText(copytext);
+				PasteText(pretext, temptext);
+				tt = temptext;
+			}
+			break;
+		case GRAPH:
+			if (copytemp) {
+				temppl = Copy(copytemp);
+				Create(prehead, temppl);
+				p = temppl;
+			}
+			break;
+		case LINE:
+			if (copyline) {
+				templine = CopyLine(copyline);
+				templine->next=LineHead->next;
+				LineHead->next = templine;
+				CurLine = temppl;
+			}
+			break;
 		}
 		break;
 	case 23:
 		//cut
-		if (SI.type == 0 || p) {
-			if (copytemp) free(copytemp);
-			copytemp = Copy(p);
-			p = Delete(prehead, p);
+		switch (CurrentMode) {
+		case _TEXT:
+			if (tt == NULL) break;
+			if (copytext) {
+				free(copytext);
+				copytext = NULL;
+			}
+			copytext = CopyText(tt);
+			tt = DeleteText(pretext, tt);
 			SI.type = 3;
-		}
-		break;
-	case 24:
-		//delete
-		if (SI.type == 1 || isline) {
+			break;
+		case GRAPH:
 			if (p) {
-				CLine_Destroy(p->cl);
-				p->cl = NULL;
+				if (copytemp) {
+					free(copytemp);
+					copytemp = NULL;
+				}
+				copytemp = Copy(p);
+				p = Delete(prehead, p);
+				SI.type = 3;
+			}
+			break;
+		case LINE:
+			if (CurLine) {
+				if (copyline) {
+					free(copyline);
+					copyline = NULL;
+				}
+				copyline = CopyLine(CurLine);
 			}
 		}
-		else if (SI.type == 2 || tt) {
+	case 24:
+		//delete
+		if (CurrentMode==LINE) {
+			if (CurLine) {
+				templine = LineHead;
+				while (templine) {
+					if (templine->next == CurLine) {
+						templine->next = CurLine->next;
+						break;
+					}
+					templine = templine->next;
+				}
+				CLine_Destroy(CurLine);
+			}
+			CurLine = NULL;
+		}
+		else if (CurrentMode==_TEXT) {
 			DeleteText(pretext, tt);
 		}
-		else if (SI.type == 0 || p) p = Delete(prehead, p);
+		else if (CurrentMode==GRAPH) p = Delete(prehead, p);
 		SI.type = 3;
 		break;
-	case 25:   //选择，用处有待商榷
-		isline = 0;
+	case 25:   //选择
 		istext = 0;
 		break;
 	case 31:
@@ -900,36 +1059,19 @@ enum __page DrawMenuProcess() {
 		SI.type = 3;
 		newflag1 = 0;
 		newflag2 = 0;
-		istext = 0;                 //文本（将要）编辑标志
+		istext = 0;                
 		switchtext = 1;             //文本选择标志
 		cancelTimer(TIME4_BLINK);
 		break;
 	case 32:
-		if(EditText||istext) EditTextCancel
-		isline = 0;
 		CurrentMode = GRAPH;
 		break;
 	case 33:
-		if (EditText||istext) EditTextCancel
 		isline = 1;
 		CurrentMode = LINE;
 		break;
 	case 41:
-		//createtext
-		//newflag3 ^= 1;
-		//if (newflag3) {
-		//	newtext = 1;
-		//	newflag1 = 0;
-		//	newflag2 = 1;
-		//	ChangeMode(1);
-		//}
-		//else {
-		//	CurrentMode = FREE;
-		//	tt = NULL;
-		//	SI.type = 3;
-		//	cancelTimer(TIME4_BLINK);
-		//	ChangeMode(0);
-		//}
+
 		if (newtext == 0 && EditText == 0) {
 			newflag1 = 0;
 			newflag2 = 1;
@@ -949,7 +1091,7 @@ enum __page DrawMenuProcess() {
 		//edittext
 		if (istext == 0&&EditText==0) {
 			istext = 1;
-			switchtext = 0;     //取消选择
+			//switchtext = 0;     //取消选择
 			ChangeMode(1);
 		}
 		break;
@@ -957,11 +1099,6 @@ enum __page DrawMenuProcess() {
 		if (switchtext && tt) {
 			tt->precolor = (tt->precolor + 1) % 9 + 1;
 			tt->color = tt->precolor;
-		}
-		break;
-	case 45:
-		if (switchtext && tt) {
-			tt->fontstyle = (tt->fontstyle + 1) % 10 + 1;
 		}
 		break;
 	case 51:
@@ -1011,19 +1148,22 @@ enum __page DrawMenuProcess() {
 		startTimer(TIME1_BLINK, 150);
 		break;
 	case 61: //线条颜色、虚实、粗细
-		if (p && p->cl) {
-			p->cl->color = (p->cl->color + 1) % 9 + 1;
+		if (CurLine) {
+			CurLine->color = (CurLine->color + 1) % 9 + 1;
 		}
 		break;
 	case 62:
-		if (p && p->cl) {
-			p->cl->solid ^= 1;
+		if (CurLine) {
+			CurLine->solid ^= 1;
 		}
 		break;
 	case 63:
-		if (p && p->cl) {
-			p->cl->size = (p->cl->size + 1 <= 4) ? (p->cl->size + 1) : 1;
+		if (CurLine) {
+			CurLine->size = (CurLine->size + 1 <= 4) ? (CurLine->size + 1) : 1;
 		}
+		break;
+	case 64:
+		InsertLine = 1;
 		break;
 	case 81:
 		SetHelpMode(1);
@@ -1034,15 +1174,24 @@ enum __page DrawMenuProcess() {
 	case 83:
 		SetHelpMode(3);
 		return HelpPage_;
-		//case 45:
-		//	//line
-		//	isline ^= 1;
-		//	ChangeLine();关于changeline先保留
-		//	break;
+	case 91:
+		autoalign__ = !autoalign__;
+		break;
+	case 92:
+		autosave = !autosave;
+		break;
+	case 93:
+		unsave = 1;
+		_Destroy(prehead, pretext, LineHead);
 	default:
 		if (sbutton == 0 || sbutton == -1)
 			MenuChanged = 0;
 		break;
 	}
 	return DrawPage_;
+}
+
+void besaved() {
+	unsave = 0;
+	newfile = 0;
 }

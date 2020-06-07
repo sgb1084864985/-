@@ -40,6 +40,14 @@ void forward(double distance) {
 	DrawLine(dx, dy);
 }
 
+void Lines_Draw(cline* LineHead,cline* CurLine) {
+	cline* temp = LineHead->next;
+	while (temp) {
+		Liner(temp,CurLine);
+		temp = temp->next;
+	}
+}
+
 /*
  * 函数名: move
  * 接口: move(double distance)
@@ -325,7 +333,7 @@ double GetAngle(double ax, double ay, double bx, double by) {
  * -------------------------------------------------
  * 画出当前连接线
  */
-void Liner(cline *l) {
+void Liner(cline *l,cline* curline) {
 	//画出连接线
 	if (l == NULL)return;
 	//设置基本模式
@@ -355,7 +363,7 @@ void Liner(cline *l) {
 	//根据方向画线
 	if (l->end->dir == xaxs) {
 		if (l->end->ex > l->end->bx) {
-			DrawArc(0.05, 180, 360);
+			if(l==curline) DrawArc(0.05, 180, 360);
 			Angle = 160;
 			forward(0.2);
 			move(-.2);
@@ -363,7 +371,7 @@ void Liner(cline *l) {
 			forward(.2);
 		}
 		else {
-			DrawArc(0.05, 0, 360);
+			if (l == curline) DrawArc(0.05, 0, 360);
 			Angle = 20;
 			forward(0.2);
 			move(-.2);
@@ -372,10 +380,9 @@ void Liner(cline *l) {
 		}
 	}
 	else {
-		l->middle = NULL;
 		//画出末尾线段
 		if (l->end->ey < l->end->by) {
-			DrawArc(0.05, 90, 360);
+			if (l == curline) DrawArc(0.05, 90, 360);
 			Angle = 70;
 			forward(0.2);
 			move(-.2);
@@ -383,7 +390,7 @@ void Liner(cline *l) {
 			forward(.2);
 		}
 		else {
-			DrawArc(0.05, 270, 360);
+			if (l == curline) DrawArc(0.05, 270, 360);
 			Angle = -70;
 			forward(0.2);
 			move(-.2);

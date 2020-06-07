@@ -25,6 +25,8 @@ static text sample = { 0,0,0,0," ",1,0,-1,1,black,gray,1,NULL };
 
 void Zoom(node *p, int dir, double x, double y);
 
+void MoveWholeLine(cline* LineHead, double dx, double dy);
+
 void Move(node *p, double prex, double prey, double x, double y);
 
 void Rotate(node *p, double x, double y);
@@ -37,13 +39,11 @@ node * CreateNew(node * prehead, int n);
 
 node * Delete(node *head, node *p);
 
-void updateline(node *p);
-
-void DrawList(node *head);
+void DrawList(node* head);
 
 line *Trveal(cline *cl, double x, double y);
 
-node * TrvealLine(node *prehead, double x, double y);
+cline* TrvealLine(cline* LineHead, double x, double y);
 
 void MoveLine(line *l, double x, double y);
 
@@ -51,11 +51,11 @@ void ZoomLine(line *l, double x, double y);
 
 int JudgeEdge(node *p, double x, double y);
 
-void JudgeConnect(node *prehead, node *p);
+void AddCline(cline* head, cline* new);
 
 node *Search(node *head, double x, double y);
 
-node * SearchLine(node *prehead, double x, double y);
+cline* SearchLine(cline* LineHead, double x, double y);
 
 double Commute(double x, double y, double x0, double y0, double k);
 
@@ -88,5 +88,11 @@ text* SearchText(text* pretext, double x, double y);
 void Cursor(text* t, double w, int k);
 
 int JudgeChinese(text* t);
+
+text* CopyText(text* t);
+
+void PasteText(text* pretext, text* t);
+
+cline* CopyLine(cline* l);
 
 #endif

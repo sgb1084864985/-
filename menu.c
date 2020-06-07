@@ -1,4 +1,4 @@
-#include "graphics.h"
+ï»¿#include "graphics.h"
 #include "extgraph.h"
 #include "genlib.h"
 #include "simpio.h"
@@ -19,26 +19,26 @@
 #include "menu.h"
 #include "draw.h"
 
-/*¾²Ì¬¾Ö²¿È«¾Ö±äÁ¿*/
-static double StatusBarHeight;		// ×´Ì¬À¸¸ß¶È
-static int	  SaveMode;				// ±£´æ×´Ì¬
-static int    CreateMode = 0;		// ±à¼­×´Ì¬£¬0-×ÔÓÉÄ£Ê½£¬1-ÎÄ±¾Ä£Ê½£¬2-Í¼ĞÎÄ£Ê½£¬3-Á¬ÏßÄ£Ê½
-static int	  FlagSelection = -1;	// Ó¦ÓÃÓÚ¼ÇÂ¼ÓÃ»§µã»÷²Ëµ¥ºóµÄ·µ»ØÖµ
+/*é™æ€å±€éƒ¨å…¨å±€å˜é‡*/
+static double StatusBarHeight;		// çŠ¶æ€æ é«˜åº¦
+static int	  SaveMode;				// ä¿å­˜çŠ¶æ€
+static int    CreateMode = 0;		// ç¼–è¾‘çŠ¶æ€ï¼Œ0-è‡ªç”±æ¨¡å¼ï¼Œ1-æ–‡æœ¬æ¨¡å¼ï¼Œ2-å›¾å½¢æ¨¡å¼ï¼Œ3-è¿çº¿æ¨¡å¼
+static int	  FlagSelection = -1;	// åº”ç”¨äºè®°å½•ç”¨æˆ·ç‚¹å‡»èœå•åçš„è¿”å›å€¼
 
 /*
-* º¯ÊıÃû£ºDrawMode
-* ½Ó¿Ú£ºDrawMode(double winwidth,double winheight)
-* ¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª
-* Õâ¸öº¯ÊıÓÃÓÚ»æÖÆ´°¿Ú×óÏÂ½ÇµÄ×´Ì¬Çò£¬ÓÃÓÚÌáÊ¾ÓÃ»§
-* µ±Ç°Ëù´¦µÄ×´Ì¬¡£·ÖÎªÀ¶É«µ×É«µÄ×ÔÓÉÄ£Ê½¡¢»ÆÉ«µ×É«
-* µÄÎÄ±¾Ä£Ê½¡¢ÂÌÉ«µ×É«µÄÍ¼ĞÎÄ£Ê½ÓëºìÉ«µ×É«µÄÁ¬ÏßÄ£
-* Ê½×Ü¼ÆËÄÖÖÄ£Ê½¡£Í¨¹ı¸Ä±äCreateModeµÄÊıÖµ£¬¸Ä±ä×´
-* Ì¬ÇòÑùÊ½¡£
+* å‡½æ•°åï¼šDrawMode
+* æ¥å£ï¼šDrawMode(double winwidth,double winheight)
+* â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”
+* è¿™ä¸ªå‡½æ•°ç”¨äºç»˜åˆ¶çª—å£å·¦ä¸‹è§’çš„çŠ¶æ€çƒï¼Œç”¨äºæç¤ºç”¨æˆ·
+* å½“å‰æ‰€å¤„çš„çŠ¶æ€ã€‚åˆ†ä¸ºè“è‰²åº•è‰²çš„è‡ªç”±æ¨¡å¼ã€é»„è‰²åº•è‰²
+* çš„æ–‡æœ¬æ¨¡å¼ã€ç»¿è‰²åº•è‰²çš„å›¾å½¢æ¨¡å¼ä¸çº¢è‰²åº•è‰²çš„è¿çº¿æ¨¡
+* å¼æ€»è®¡å››ç§æ¨¡å¼ã€‚é€šè¿‡æ”¹å˜CreateModeçš„æ•°å€¼ï¼Œæ”¹å˜çŠ¶
+* æ€çƒæ ·å¼ã€‚
 */
 void DrawMode(double winwidth, double winheight) {
 	double ModeCircleX = winwidth / 20,
-		ModeCircleY = winheight / 20 + StatusBarHeight, r;	// ×´Ì¬ÇòµÄ×ø±êÓë°ë¾¶
-	char* ModeInformation, * ModeColor;						// ×´Ì¬ÇòÄÚÈİÓëÑÕÉ«×Ö·û´®
+		ModeCircleY = winheight / 20 + StatusBarHeight, r;	// çŠ¶æ€çƒçš„åæ ‡ä¸åŠå¾„
+	char* ModeInformation, * ModeColor;						// çŠ¶æ€çƒå†…å®¹ä¸é¢œè‰²å­—ç¬¦ä¸²
 
 	DefineColor("FreeModeColor", 0.07, 0.72, 0.96);
 	DefineColor("TextModeColor", 1.00, 0.80, 0.26);
@@ -47,23 +47,23 @@ void DrawMode(double winwidth, double winheight) {
 
 	SetEraseMode(0);
 
-	// ¸ù¾İµ±Ç°CreateModeÖµÑ¡ÔñÄ£Ê½£¬¶ÔÄÚÈİÓëÑÕÉ«×Ö·û´®¸³Öµ
+	// æ ¹æ®å½“å‰CreateModeå€¼é€‰æ‹©æ¨¡å¼ï¼Œå¯¹å†…å®¹ä¸é¢œè‰²å­—ç¬¦ä¸²èµ‹å€¼
 	switch (CreateMode) {
-	case 0:default:ModeInformation = "×ÔÓÉÄ£Ê½"; ModeColor = "FreeModeColor"; break;
-	case 1:ModeInformation = "ÎÄ±¾Ä£Ê½"; ModeColor = "TextModeColor"; break;
-	case 2:ModeInformation = "Í¼ĞÎÄ£Ê½"; ModeColor = "GraphModeColor"; break;
-	case 3:ModeInformation = "Á¬ÏßÄ£Ê½"; ModeColor = "LineModeColor"; break;
+	case 0:default:ModeInformation = "è‡ªç”±æ¨¡å¼"; ModeColor = "FreeModeColor"; break;
+	case 1:ModeInformation = "æ–‡æœ¬æ¨¡å¼"; ModeColor = "TextModeColor"; break;
+	case 2:ModeInformation = "å›¾å½¢æ¨¡å¼"; ModeColor = "GraphModeColor"; break;
+	case 3:ModeInformation = "è¿çº¿æ¨¡å¼"; ModeColor = "LineModeColor"; break;
 	}
 
-	// Éè¶¨°ë¾¶Óë×ø±ê
+	// è®¾å®šåŠå¾„ä¸åæ ‡
 	r = TextStringWidth(ModeInformation) * 0.6;
 	ModeCircleX += r;
 	ModeCircleY += GetFontHeight() / 2;
 
-	// Éè¶¨ÑÕÉ«¡¢×ÖÌå£¬ÒÆ¶¯»­±Ê½øĞĞÇòÓë×Ö·û´®µÄ»æ»­
+	// è®¾å®šé¢œè‰²ã€å­—ä½“ï¼Œç§»åŠ¨ç”»ç¬”è¿›è¡Œçƒä¸å­—ç¬¦ä¸²çš„ç»˜ç”»
 	StartFilledRegion(0.5);
 	SetPenColor(ModeColor);
-	SetFont("ºÚÌå");
+	SetFont("é»‘ä½“");
 	MovePen(ModeCircleX, ModeCircleY);
 	DrawArc(r, 0, 360);
 	EndFilledRegion();
@@ -73,12 +73,12 @@ void DrawMode(double winwidth, double winheight) {
 }
 
 /*
-* º¯ÊıÃû£ºGetSelection
-* ½Ó¿Ú£ºGetSelection()
-* ¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª
-* ÓÃÓÚ½«¾Ö²¿È«¾Ö±äÁ¿
-* FlagSelection´«µİ¸ø
-* ÆäËûÎÄ¼şÄÚµÄº¯Êı¡£
+* å‡½æ•°åï¼šGetSelection
+* æ¥å£ï¼šGetSelection()
+* â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”
+* ç”¨äºå°†å±€éƒ¨å…¨å±€å˜é‡
+* FlagSelectionä¼ é€’ç»™
+* å…¶ä»–æ–‡ä»¶å†…çš„å‡½æ•°ã€‚
 */
 int GetSelection() {
 	int PresentSelection = FlagSelection;
@@ -87,132 +87,112 @@ int GetSelection() {
 }
 
 /*
-* º¯ÊıÃû£ºDrawMenu
-* ½Ó¿Ú£ºDrawMenu(double winwidth, double winheight)
-* ¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª
-* ÀûÓÃsimpleGUI»æÖÆ½çÃæÉÏ·½µÄ²Ëµ¥À¸£¬²¢¶ÔÓÃ»§µÄµã»÷
-* ½øĞĞ¼à²â£¬ÊµÊ±¼ÇÂ¼°´ÏÂ°´¼ü¶ÔÓ¦µÄ²ÎÊıÖµ£¬´¢´æÔÚ
-* FlagSelectionÖĞ¡£Í¬Ê±¸Ä±äCreateModeµÄÖµ±íÊ¾±ä¸üÄ£
-* Ê½£¬¶ÔÓÚ±È½Ï¼òµ¥µÄº¯Êı£¨ÈçMusic£©Ö±½Ó½øĞĞµ÷ÓÃ¡£
+* å‡½æ•°åï¼šDrawMenu
+* æ¥å£ï¼šDrawMenu(double winwidth, double winheight)
+* â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”
+* åˆ©ç”¨simpleGUIç»˜åˆ¶ç•Œé¢ä¸Šæ–¹çš„èœå•æ ï¼Œå¹¶å¯¹ç”¨æˆ·çš„ç‚¹å‡»
+* è¿›è¡Œç›‘æµ‹ï¼Œå®æ—¶è®°å½•æŒ‰ä¸‹æŒ‰é”®å¯¹åº”çš„å‚æ•°å€¼ï¼Œå‚¨å­˜åœ¨
+* FlagSelectionä¸­ã€‚åŒæ—¶æ”¹å˜CreateModeçš„å€¼è¡¨ç¤ºå˜æ›´æ¨¡
+* å¼ï¼Œå¯¹äºæ¯”è¾ƒç®€å•çš„å‡½æ•°ï¼ˆå¦‚Musicï¼‰ç›´æ¥è¿›è¡Œè°ƒç”¨ã€‚
 */
 void DrawMenu(double winwidth, double winheight)
 {
 	SetEraseMode(0);
-	// ÒÔÏÂÊÇÒÀsimpleGUI¹æ¶¨£¬Ô¤ÏÈ¶¨ÒåµÄ8¸ö²Ëµ¥µÄÄÚÈİ
-	static char* menuListFile[] = { "ÎÄ¼ş",
-		"ĞÂ½¨  | Ctrl-N",
-		"´ò¿ª  | Ctrl-O",
-		"±£´æ  | Ctrl-S",
-		"Áí´æÎª",
-		"·µ»Ø",
-		"Çå¿Õ",
-		"ÍË³ö  | Ctrl-Q" };
-	static char* menuListEdit[] = { "±à¼­",
-		"¸´ÖÆ  | Ctrl-C",
-		"Õ³Ìù  | Ctrl-V",
-		"¼ôÇĞ  | Ctrl-X",
-		"É¾³ı  | Ctrl-D",
-		"Ñ¡Ôñ" };
-	static char* menuListMode[] = { "Ä£Ê½",
-		"ÎÄ±¾Ä£Ê½",
-		"Í¼ĞÎÄ£Ê½",
-		"Á¬ÏßÄ£Ê½" };
-	static char* menuListText[] = { "ÎÄ±¾",
-		"²åÈëÎÄ±¾",
-		"ÎÄ±¾Ñ¡Ôñ",
-		"±à¼­ÎÄ±¾",
-		"ÇĞ»»ÑÕÉ«",
-		"×ÖÌå´óĞ¡",
-		"×ÖÌå·ç¸ñ" };
-	static char* menuListGraphic[] = { "Í¼ĞÎ",
-		"²åÈë¾ØĞÎ",
-		"²åÈëÁâĞÎ",
-		"²åÈëÔ²½Ç",
-		"ÇĞ»»ÑÕÉ«",
-		"ÇĞ»»ĞéÊµ",
-		"ÇĞ»»´ÖÏ¸",
-		"ÇĞ»»Ìî³ä",
-		/*"ÇĞ»»ÉÁË¸"*/ };
-	static char* menuListLine[] = { "Á¬Ïß",
-		"ÇĞ»»ÑÕÉ«",
-		"ÇĞ»»ĞéÊµ",
-		"ÇĞ»»´ÖÏ¸" };
-	static char* menuListMusic[] = { "ÒôÀÖ",
-		"Õã½­´óÑ§Ğ£¸è",
+	// ä»¥ä¸‹æ˜¯ä¾simpleGUIè§„å®šï¼Œé¢„å…ˆå®šä¹‰çš„8ä¸ªèœå•çš„å†…å®¹
+	static char* menuListFile[] = { "æ–‡ä»¶",
+		"æ–°å»º  | Ctrl-N",
+		"æ‰“å¼€  | Ctrl-O",
+		"ä¿å­˜  | Ctrl-S",
+		"å¦å­˜ä¸º",
+		"è¿”å›",
+		"å…³é—­",
+		"é€€å‡º  | Ctrl-Q" };
+	static char* menuListEdit[] = { "ç¼–è¾‘",
+		"å¤åˆ¶  | Ctrl-C",
+		"ç²˜è´´  | Ctrl-V",
+		"å‰ªåˆ‡  | Ctrl-X",
+		"åˆ é™¤  | Ctrl-D",
+		"é€‰æ‹©" };
+	static char* menuListMode[] = { "æ¨¡å¼",
+		"æ–‡æœ¬æ¨¡å¼",
+		"å›¾å½¢æ¨¡å¼",
+		"è¿çº¿æ¨¡å¼" };
+	static char* menuListText[] = { "æ–‡æœ¬",
+		"æ’å…¥æ–‡æœ¬",
+		"æ–‡æœ¬é€‰æ‹©",
+		"ç¼–è¾‘æ–‡æœ¬",
+		"åˆ‡æ¢é¢œè‰²"};
+	static char* menuListGraphic[] = { "å›¾å½¢",
+		"æ’å…¥çŸ©å½¢",
+		"æ’å…¥è±å½¢",
+		"æ’å…¥åœ†è§’",
+		"åˆ‡æ¢é¢œè‰²",
+		"åˆ‡æ¢è™šå®",
+		"åˆ‡æ¢ç²—ç»†",
+		"åˆ‡æ¢å¡«å……",
+		/*"åˆ‡æ¢é—ªçƒ"*/ };
+	static char* menuListLine[] = { "è¿çº¿",
+		"åˆ‡æ¢é¢œè‰²",
+		"åˆ‡æ¢è™šå®",
+		"åˆ‡æ¢ç²—ç»†",
+		"æ’å…¥è¿çº¿" };
+	static char* menuListMusic[] = { "éŸ³ä¹",
+		"æµ™æ±Ÿå¤§å­¦æ ¡æ­Œ",
 		"The Congress Reel",
 		"Yellow",
-		"Í£Ö¹²¥·Å" };
-	static char* menuListHelp[] = { "°ïÖú",
-		"Ê¹ÓÃ°ïÖú",
-		"¿ì½İÈÈ¼ü",
-		"¹ØÓÚÈí¼ş" };
+		"åœæ­¢æ’­æ”¾" };
+	static char* menuListHelp[] = { "å¸®åŠ©",
+		"ä½¿ç”¨å¸®åŠ©",
+		"å¿«æ·çƒ­é”®",
+		"å…³äºè½¯ä»¶" };
+	static char* menuListSetting[] = { "è®¾ç½®",
+		"è¿çº¿è‡ªåŠ¨å¯¹é½",
+		"é€€å‡ºæ—¶è‡ªåŠ¨ä¿å­˜" };
 
-	double h; // ¿Ø¼ş¸ß¶È
-	double w; // ¿Ø¼ş¿í¶È
-	double x = 0;// ¸÷¸ö°´Å¥µÄxÎ»ÖÃ£¬Öğ½¥µİÔö
-	double y = winheight;// °´Å¥µÄyÎ»ÖÃ£¬²»±ä
-	double MenuButtonInterval = 0.6;// °´Å¥Ö®¼äµÄ¼ä¸ô
-	int    ReturnFlag = 0;// ÓÃÓÚÈ·¶¨×îÖÕ½«ÄÄ¸ö°´Å¥µÄ·µ»ØÖµ´«ÈëFlagSelection
-	int	   MenuLen;       // ´ú±íÄ³¸ö²Ëµ¥Ñ¡ÏîµÄ¸öÊı
+	double h; // æ§ä»¶é«˜åº¦
+	double w; // æ§ä»¶å®½åº¦
+	double x = 0;// å„ä¸ªæŒ‰é’®çš„xä½ç½®ï¼Œé€æ¸é€’å¢
+	double y = winheight;// æŒ‰é’®çš„yä½ç½®ï¼Œä¸å˜
+	double MenuButtonInterval = 0.4;// æŒ‰é’®ä¹‹é—´çš„é—´éš”
+	int    ReturnFlag = 0;// ç”¨äºç¡®å®šæœ€ç»ˆå°†å“ªä¸ªæŒ‰é’®çš„è¿”å›å€¼ä¼ å…¥FlagSelection
+	int	   MenuLen;       // ä»£è¡¨æŸä¸ªèœå•é€‰é¡¹çš„ä¸ªæ•°
 	int    FileSelection, EditSelection, ModeSelection, TextSelection, GraphicSelection,
-		LineSelection, MusicSelection, HelpSelection;// ·Ö±ğ¼ÇÂ¼Ã¿Ò»¸ö°´Å¥µÄ·µ»ØÖµ
-	static int IsInText = 0;// ±êÖ¾ÊÇ·ñ´¦ÓÚÎÄ±¾Ä£Ê½£¬ÒÔ±ä¶¯ÎÄ±¾²Ëµ¥°´Å¥ÖĞµÄÄÚÈİ
+		LineSelection, MusicSelection, HelpSelection, SettingSelection;// åˆ†åˆ«è®°å½•æ¯ä¸€ä¸ªæŒ‰é’®çš„è¿”å›å€¼
+	static int IsInText = 0, set1 = 1, set2 = 1;// æ ‡å¿—æ˜¯å¦å¤„äºæ–‡æœ¬æ¨¡å¼ï¼Œä»¥å˜åŠ¨æ–‡æœ¬èœå•æŒ‰é’®ä¸­çš„å†…å®¹
 
-	// ×Ô¶¨ÒåÑÕÉ«
+	// è‡ªå®šä¹‰é¢œè‰²
 	DefineColor("ButtonFrameCommon", 0.07, 0.72, 0.96);
 	DefineColor("ButtonFrameHot", 0.20, 0.60, 1.00);
 	setMenuColors("ButtonFrameCommon", "White", "ButtonFrameHot", "White", 1);
 
-	// ¶¨Òå×ÖÌåÓë´óĞ¡
-	SetFont("Î¢ÈíÑÅºÚ");
+	// å®šä¹‰å­—ä½“ä¸å¤§å°
+	SetFont("å¾®è½¯é›…é»‘");
 	SetPointSize(18);
 
-	//ÔÚ¹æ¶¨ºÃ×ÖÌåÓë´óĞ¡ºó£¬¶Ô¿Ø¼ş¿í¶È¡¢¸ß¶È¸³Öµ
+	//åœ¨è§„å®šå¥½å­—ä½“ä¸å¤§å°åï¼Œå¯¹æ§ä»¶å®½åº¦ã€é«˜åº¦èµ‹å€¼
 	w = TextStringWidth(menuListFile[0]) * 1.5;
 	h = GetFontHeight() * 1.2;
 
-	// »æÖÆ´°¿Ú±êÌâ
-	SetWindowTitle("Ğ¡ĞÍËã·¨Á÷³ÌÍ¼»æÖÆ¹¤¾ß-»æÖÆ½çÃæ");
+	// ç»˜åˆ¶çª—å£æ ‡é¢˜
+	SetWindowTitle("å°å‹ç®—æ³•æµç¨‹å›¾ç»˜åˆ¶å·¥å…·-ç»˜åˆ¶ç•Œé¢");
 
-	// ÒÀ´Î»æÖÆ²Ëµ¥À¸Óë¸÷¸ö²Ëµ¥°´Å¥
+	// ä¾æ¬¡ç»˜åˆ¶èœå•æ ä¸å„ä¸ªèœå•æŒ‰é’®
 	drawMenuBar(0, y - h, winwidth, h);
 
-	// File ²Ëµ¥
+	// File èœå•
 	setMenuColors("ButtonFrameCommon", "White", "ButtonFrameHot", "White", 1);
 	FileSelection = menuList(GenUIID(0), x, y - h, w, TextStringWidth(menuListFile[1]) * 1.2, h,
 		menuListFile, sizeof(menuListFile) / sizeof(menuListFile[0])) + 10;
 	if (FileSelection > 10) {
 		ReturnFlag = 1;
-		CreateMode = 0;// ×ªÎª×ÔÓÉÄ£Ê½
+		CreateMode = 0;// è½¬ä¸ºè‡ªç”±æ¨¡å¼
 		if (FileSelection == 13 || FileSelection == 14) {
-			SaveMode = 1;// ×ªÎªÒÑ±£´æ×´Ì¬
+			SaveMode = 1;// è½¬ä¸ºå·²ä¿å­˜çŠ¶æ€
 		}
 	}
 
-	// Edit ²Ëµ¥
-	EditSelection = menuList(GenUIID(0), x + w + MenuButtonInterval, y - h, w, TextStringWidth(menuListEdit[1]) * 1.2, h,
-		menuListEdit, sizeof(menuListEdit) / sizeof(menuListEdit[0])) + 20;
-	if (EditSelection > 20) {
-		ReturnFlag = 2;
-		if (EditSelection == 25) {
-			CreateMode = 0; // ×ªÎª×ÔÓÉÄ£Ê½
-		}
-	}
-
-	// Mode ²Ëµ¥
-	ModeSelection = menuList(GenUIID(0), x + 2 * (w + MenuButtonInterval), y - h, w, TextStringWidth(menuListMode[1]) * 1.2, h,
-		menuListMode, sizeof(menuListMode) / sizeof(menuListMode[0])) + 30;
-	if (ModeSelection > 30) {
-		ReturnFlag = 3;
-		switch (ModeSelection) {
-		case 31: if (CreateMode != 1) IsInText = 0; CreateMode = 1; break;// ×ªÎªÎÄ±¾Ä£Ê½
-		case 32: CreateMode = 2; break;// ×ªÎªÍ¼ĞÎÄ£Ê½
-		case 33: CreateMode = 3; break;// ×ªÎªÁ¬ÏßÄ£Ê½
-		}
-	}
-
-	// Text ²Ëµ¥
-	if (CreateMode == 1) {// Èô²»´¦ÓÚÎÄ±¾Ä£Ê½Ôò´¦ÓÚ½ûÓÃµÄ»ÒÉ«×´Ì¬
+	// Edit èœå•
+	if (CreateMode != 0) {// è‹¥å¤„äºè‡ªç”±æ¨¡å¼åˆ™å¤„äºç¦ç”¨çš„ç°è‰²çŠ¶æ€
 		setMenuColors("ButtonFrameCommon", "White", "ButtonFrameHot", "White", 1);
 		MenuLen = sizeof(menuListText) / sizeof(menuListText[0]);
 	}
@@ -220,25 +200,49 @@ void DrawMenu(double winwidth, double winheight)
 		setMenuColors("Gray", "White", "Gray", "White", 1);
 		MenuLen = 1;
 	}
-	menuListText[1] = IsInText ? "ÍË³öÎÄ±¾" : "²åÈëÎÄ±¾";// ¸ù¾İÊÇ·ñ´¦ÓÚÎÄ±¾Ä£Ê½±ä»¯ÄÚÈİ
+	EditSelection = menuList(GenUIID(0), x + w + MenuButtonInterval, y - h, w, TextStringWidth(menuListEdit[1]) * 1.2, h,
+		menuListEdit, sizeof(menuListEdit) / sizeof(menuListEdit[0])) + 20;
+	if (EditSelection > 20 && CreateMode != 0) {
+		ReturnFlag = 2;
+		if (EditSelection == 25) {
+			CreateMode = 0; // è½¬ä¸ºè‡ªç”±æ¨¡å¼
+		}
+	}
+	setMenuColors("ButtonFrameCommon", "White", "ButtonFrameHot", "White", 1);
+
+	// Mode èœå•
+	ModeSelection = menuList(GenUIID(0), x + 2 * (w + MenuButtonInterval), y - h, w, TextStringWidth(menuListMode[1]) * 1.2, h,
+		menuListMode, sizeof(menuListMode) / sizeof(menuListMode[0])) + 30;
+	if (ModeSelection > 30) {
+		ReturnFlag = 3;
+		switch (ModeSelection) {
+		case 31: if (CreateMode != 1) IsInText = 0; CreateMode = 1; break;// è½¬ä¸ºæ–‡æœ¬æ¨¡å¼
+		case 32: CreateMode = 2; break;// è½¬ä¸ºå›¾å½¢æ¨¡å¼
+		case 33: CreateMode = 3; break;// è½¬ä¸ºè¿çº¿æ¨¡å¼
+		}
+	}
+
+	// Text èœå•
+	if (CreateMode == 1) {// è‹¥ä¸å¤„äºæ–‡æœ¬æ¨¡å¼åˆ™å¤„äºç¦ç”¨çš„ç°è‰²çŠ¶æ€
+		setMenuColors("ButtonFrameCommon", "White", "ButtonFrameHot", "White", 1);
+		MenuLen = sizeof(menuListText) / sizeof(menuListText[0]);
+	}
+	else {
+		setMenuColors("Gray", "White", "Gray", "White", 1);
+		MenuLen = 1;
+	}
 	TextSelection = menuList(GenUIID(0), x + 3 * (w + MenuButtonInterval), y - h, w, TextStringWidth(menuListText[1]) * 1.2, h,
 		menuListText, MenuLen) + 40;
-	if (TextSelection > 40 && CreateMode == 1) {// µ±ÇÒ½öµ±´¦ÓÚÎÄ±¾Ä£Ê½£¬Õâ¸ö²Ëµ¥À¸ÏÂµÄ°´Å¥²Å»áÓĞÏìÓ¦
+	if (TextSelection > 40 && CreateMode == 1) {// å½“ä¸”ä»…å½“å¤„äºæ–‡æœ¬æ¨¡å¼ï¼Œè¿™ä¸ªèœå•æ ä¸‹çš„æŒ‰é’®æ‰ä¼šæœ‰å“åº”
 		switch (TextSelection) {
-		case 41:
-			IsInText = IsInText ? 0 : 1;// µã»÷µÚÒ»¸ö°´Å¥£¬×ª±äIsInText£¬¼Ì¶ø×ª±äËù´¦Ä£Ê½
-			if (IsInText)	CreateMode = 1;
-			else			CreateMode = 0;
-			ReturnFlag = 4;
-			break;
-		case 42: case 43: case 44: case 45: case 46: ReturnFlag = 4; break;
+		case 41:case 42: case 43: case 44: case 45: case 46: ReturnFlag = 4; break;
 		default:break;
 		}
 	}
 	setMenuColors("ButtonFrameCommon", "White", "ButtonFrameHot", "White", 1);
 
-	// Graphic ²Ëµ¥
-	if (CreateMode == 2) {// Èô²»´¦ÓÚÍ¼ÏóÄ£Ê½Ôò´¦ÓÚ½ûÓÃµÄ»ÒÉ«×´Ì¬
+	// Graphic èœå•
+	if (CreateMode == 2) {// è‹¥ä¸å¤„äºå›¾è±¡æ¨¡å¼åˆ™å¤„äºç¦ç”¨çš„ç°è‰²çŠ¶æ€
 		setMenuColors("ButtonFrameCommon", "White", "ButtonFrameHot", "White", 1);
 		MenuLen = sizeof(menuListGraphic) / sizeof(menuListGraphic[0]);
 	}
@@ -248,13 +252,13 @@ void DrawMenu(double winwidth, double winheight)
 	}
 	GraphicSelection = menuList(GenUIID(0), x + 4 * (w + MenuButtonInterval), y - h, w, TextStringWidth(menuListGraphic[1]) * 1.2, h,
 		menuListGraphic, MenuLen) + 50;
-	if (GraphicSelection > 50 && CreateMode == 2) {// µ±ÇÒ½öµ±´¦ÓÚÍ¼ĞÎÄ£Ê½£¬Õâ¸ö²Ëµ¥À¸ÏÂµÄ°´Å¥²Å»áÓĞÏìÓ¦
+	if (GraphicSelection > 50 && CreateMode == 2) {// å½“ä¸”ä»…å½“å¤„äºå›¾å½¢æ¨¡å¼ï¼Œè¿™ä¸ªèœå•æ ä¸‹çš„æŒ‰é’®æ‰ä¼šæœ‰å“åº”
 		ReturnFlag = 5;
 	}
 	setMenuColors("ButtonFrameCommon", "White", "ButtonFrameHot", "White", 1);
 
-	// Line ²Ëµ¥
-	if (CreateMode == 3) {// Èô²»´¦ÓÚÁ¬ÏßÄ£Ê½Ôò´¦ÓÚ½ûÓÃµÄ»ÒÉ«×´Ì¬
+	// Line èœå•
+	if (CreateMode == 3) {// è‹¥ä¸å¤„äºè¿çº¿æ¨¡å¼åˆ™å¤„äºç¦ç”¨çš„ç°è‰²çŠ¶æ€
 		setMenuColors("ButtonFrameCommon", "White", "ButtonFrameHot", "White", 1);
 		MenuLen = sizeof(menuListLine) / sizeof(menuListLine[0]);
 	}
@@ -263,30 +267,45 @@ void DrawMenu(double winwidth, double winheight)
 		MenuLen = 1;
 	}
 	LineSelection = menuList(GenUIID(0), x + 5 * (w + MenuButtonInterval), y - h, w, TextStringWidth(menuListLine[1]) * 1.2, h,
-		menuListLine, MenuLen) + 60;// µ±ÇÒ½öµ±´¦ÓÚÁ¬ÏßÄ£Ê½£¬Õâ¸ö²Ëµ¥À¸ÏÂµÄ°´Å¥²Å»áÓĞÏìÓ¦
+		menuListLine, MenuLen) + 60;// å½“ä¸”ä»…å½“å¤„äºè¿çº¿æ¨¡å¼ï¼Œè¿™ä¸ªèœå•æ ä¸‹çš„æŒ‰é’®æ‰ä¼šæœ‰å“åº”
 	if (LineSelection > 60 && CreateMode == 3) {
 		ReturnFlag = 6;
 	}
 	setMenuColors("ButtonFrameCommon", "White", "ButtonFrameHot", "White", 1);
 
-	// Music ²Ëµ¥
+	// Music èœå•
 	MusicSelection = menuList(GenUIID(0), x + 6 * (w + MenuButtonInterval), y - h, w, TextStringWidth(menuListMusic[2]) * 1.2, h,
 		menuListMusic, sizeof(menuListMusic) / sizeof(menuListMusic[0])) + 70;
-	if (MusicSelection > 70) {// ¶ÔÒôÀÖ½øĞĞ²¥·ÅÓëÍ£Ö¹²Ù×÷
+	if (MusicSelection > 70) {// å¯¹éŸ³ä¹è¿›è¡Œæ’­æ”¾ä¸åœæ­¢æ“ä½œ
 		Music(MusicSelection - 70);
-		CreateMode = 0;// ×ªÎª×ÔÓÉÄ£Ê½
+		CreateMode = 0;// è½¬ä¸ºè‡ªç”±æ¨¡å¼
 		ReturnFlag = 7;
 	}
 
-	// Help ²Ëµ¥
+	// Help èœå•
 	HelpSelection = menuList(GenUIID(0), x + 7 * (w + MenuButtonInterval), y - h, w, TextStringWidth(menuListHelp[1]) * 1.2, h,
 		menuListHelp, sizeof(menuListHelp) / sizeof(menuListHelp[0])) + 80;
 	if (HelpSelection > 80) {
-		CreateMode = 0; // ×ªÎª×ÔÓÉÄ£Ê½
+		CreateMode = 0; // è½¬ä¸ºè‡ªç”±æ¨¡å¼
 		ReturnFlag = 8;
 	}
 
-	// Í¨¹ı¶ÔReturnFlag½øĞĞswitch-case£¬¼ÇÂ¼Ç¡µ±µÄ·µ»ØÖµ£¬²¢ÔÚÒ»Ğ©Çé¿öÏÂÖÃSaveModeÎª0
+	// Setting èœå•
+
+	if (set1 ) menuListSetting[1] = "å–æ¶ˆè‡ªåŠ¨å¯¹é½";
+	else menuListSetting[1] = "è¿çº¿è‡ªåŠ¨å¯¹é½";
+
+	if (set2 ) menuListSetting[2] = "å–æ¶ˆè‡ªåŠ¨ä¿å­˜";
+	else menuListSetting[2] = "é€€å‡ºæ—¶è‡ªåŠ¨ä¿å­˜";
+
+	SettingSelection = menuList(GenUIID(0), x + 8 * (w + MenuButtonInterval), y - h, w, TextStringWidth(menuListSetting[1]) * 1.2, h,
+		menuListSetting, sizeof(menuListSetting) / sizeof(menuListSetting[0])) + 90;
+	if (SettingSelection > 90) {
+		if (SettingSelection == 91) set1 = !set1;
+		else set2 = !set2;
+		ReturnFlag = 9;
+	}
+	// é€šè¿‡å¯¹ReturnFlagè¿›è¡Œswitch-caseï¼Œè®°å½•æ°å½“çš„è¿”å›å€¼ï¼Œå¹¶åœ¨ä¸€äº›æƒ…å†µä¸‹ç½®SaveModeä¸º0
 	switch (ReturnFlag) {
 	case 0: FlagSelection = 0; break;
 	case 1: FlagSelection = FileSelection; break;
@@ -297,194 +316,229 @@ void DrawMenu(double winwidth, double winheight)
 	case 6: FlagSelection = LineSelection; break;
 	case 7: FlagSelection = MusicSelection; break;
 	case 8: FlagSelection = HelpSelection; break;
+	case 9: FlagSelection = SettingSelection; break;
 	default: FlagSelection = -1; break;
 	}
-	// ÖØÖÃReturnFlag
+	// é‡ç½®ReturnFlag
 	ReturnFlag = 0;
 }
 
 
 /*
-* º¯ÊıÃû£ºDrawStatusBar
-* ½Ó¿Ú£ºDrawStatusBar(LinkStatusInfo PresentLinkStatusInfo, double winwidth, double winheight)
-* ¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª
-* Í¨¹ı´«µİ½øÀ´µÄº¬ÓĞĞÅÏ¢µÄ½á¹¹ÌåÖ¸Õë£¬ÁË½âÎÄ¼şÃû¡¢µ±Ç°ÓÃ»§ÊÇ·ñÑ¡ÖĞÁËÔªËØ£¬ÈôÑ¡ÖĞ£¬Ôò½øÒ»²½ÁË½â
-* Ñ¡ÖĞÔªËØµÄÏà¹ØÊôĞÔ¡£½«ÒÔÉÏĞÅÏ¢È«²¿Õ¹ÏÖÔÚµ×²¿µÄĞÅÏ¢À¸£¬ÒÔ±ãÓÃ»§²Ù×÷¡£¶ÔÓÚÎÄ¼şÊÇ·ñ´¦ÓÚ±£´æ×´Ì¬£¬
-* ²ÉÓÃÔÚÎÄ¼şÃûºó¼ÓÉÏ*±êÖ¾±íÊ¾Î´±£´æ£¬Ã»ÓĞÔò±íÊ¾ÒÑ±»±£´æ¡£
+* å‡½æ•°åï¼šDrawStatusBar
+* æ¥å£ï¼šDrawStatusBar(LinkStatusInfo PresentLinkStatusInfo, double winwidth, double winheight)
+* â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”
+* é€šè¿‡ä¼ é€’è¿›æ¥çš„å«æœ‰ä¿¡æ¯çš„ç»“æ„ä½“æŒ‡é’ˆï¼Œäº†è§£æ–‡ä»¶åã€å½“å‰ç”¨æˆ·æ˜¯å¦é€‰ä¸­äº†å…ƒç´ ï¼Œè‹¥é€‰ä¸­ï¼Œåˆ™è¿›ä¸€æ­¥äº†è§£
+* é€‰ä¸­å…ƒç´ çš„ç›¸å…³å±æ€§ã€‚å°†ä»¥ä¸Šä¿¡æ¯å…¨éƒ¨å±•ç°åœ¨åº•éƒ¨çš„ä¿¡æ¯æ ï¼Œä»¥ä¾¿ç”¨æˆ·æ“ä½œã€‚å¯¹äºæ–‡ä»¶æ˜¯å¦å¤„äºä¿å­˜çŠ¶æ€ï¼Œ
+* é‡‡ç”¨åœ¨æ–‡ä»¶åååŠ ä¸Š*æ ‡å¿—è¡¨ç¤ºæœªä¿å­˜ï¼Œæ²¡æœ‰åˆ™è¡¨ç¤ºå·²è¢«ä¿å­˜ã€‚
 */
 void DrawStatusBar(LinkStatusInfo PresentLinkStatusInfo, double winwidth, double winheight) {
-	static char PositionX[100], PositionY[100];// ´¢´æËùÑ¡ÔªËØµÄÎ»ÖÃ×ø±ê
-	static char MouseX[100], MouseY[100];// ´¢´æÊó±êµÄÎ»ÖÃ×ø±ê
-	static char ItemWidth[100], ItemHeight[100];// ´¢´æÔªËØµÄ¿í¶ÈÓë¸ß¶È
-	static char LineBeginX[100], LineBeginY[100];// ´¢´æÁ¬ÏßÆğµãµÄÎ»ÖÃ×ø±ê
-	static char LineEndX[100], LineEndY[100];// ´¢´æÁ¬ÏßÖÕµãµÄÎ»ÖÃ×ø±ê
-	static char PenSize[100];// ´¢´æ»­±Ê´óĞ¡
-	static char* IfFrameOrFilled[] = { "·ñ","ÊÇ" };// ÓÃÓÚÏÔÊ¾ÉÁË¸ÓëÌî³äµÄÊÇºÍ·ñ
-	static char* DottedOrFull[] = { "ĞéÏß", "ÊµÏß" };// ÓÃÓÚÏÔÊ¾ÏßĞÍµÄĞéÊµ
-	static char* SelectMsg[] = { "| µ±Ç°Ñ¡ÖĞÔªËØÎªÁâĞÎ£¬Ïà¹ØĞÅÏ¢Îª£º",
-		"| µ±Ç°Ñ¡ÖĞÔªËØÎª¾ØĞÎ£¬Ïà¹ØĞÅÏ¢Îª£º",
-		"| µ±Ç°Ñ¡ÖĞÔªËØÎªÔ²½Ç¾ØĞÎ£¬Ïà¹ØĞÅÏ¢Îª£º",
-		"| µ±Ç°Ñ¡ÖĞÔªËØÎªÁ¬½ÓÏß£¬Ïà¹ØĞÅÏ¢Îª£º",
-		"| µ±Ç°Ñ¡ÖĞÔªËØÎªÎÄ±¾¿ò£¬Ïà¹ØĞÅÏ¢Îª£º" };// ÓÃÓÚÏÔÊ¾ÌáÊ¾ĞÅÏ¢
+	static char PositionX[100], PositionY[100];// å‚¨å­˜æ‰€é€‰å…ƒç´ çš„ä½ç½®åæ ‡
+	static char MouseX[100], MouseY[100];// å‚¨å­˜é¼ æ ‡çš„ä½ç½®åæ ‡
+	static char ItemWidth[100], ItemHeight[100];// å‚¨å­˜å…ƒç´ çš„å®½åº¦ä¸é«˜åº¦
+	static char LineBeginX[100], LineBeginY[100];// å‚¨å­˜è¿çº¿èµ·ç‚¹çš„ä½ç½®åæ ‡
+	static char LineEndX[100], LineEndY[100];// å‚¨å­˜è¿çº¿ç»ˆç‚¹çš„ä½ç½®åæ ‡
+	static char PenSize[100];// å‚¨å­˜ç”»ç¬”å¤§å°
+	static char* IfFrameOrFilled[] = { "å¦","æ˜¯" };// ç”¨äºæ˜¾ç¤ºé—ªçƒä¸å¡«å……çš„æ˜¯å’Œå¦
+	static char* DottedOrFull[] = { "è™šçº¿", "å®çº¿" };// ç”¨äºæ˜¾ç¤ºçº¿å‹çš„è™šå®
+	static char* SelectMsg[] = { "| å½“å‰é€‰ä¸­å…ƒç´ ä¸ºè±å½¢ï¼Œç›¸å…³ä¿¡æ¯ä¸ºï¼š",
+		"| å½“å‰é€‰ä¸­å…ƒç´ ä¸ºçŸ©å½¢ï¼Œç›¸å…³ä¿¡æ¯ä¸ºï¼š",
+		"| å½“å‰é€‰ä¸­å…ƒç´ ä¸ºåœ†è§’çŸ©å½¢ï¼Œç›¸å…³ä¿¡æ¯ä¸ºï¼š",
+		"| å½“å‰é€‰ä¸­å…ƒç´ ä¸ºè¿æ¥çº¿ï¼Œç›¸å…³ä¿¡æ¯ä¸ºï¼š",
+		"| å½“å‰é€‰ä¸­å…ƒç´ ä¸ºæ–‡æœ¬æ¡†ï¼Œç›¸å…³ä¿¡æ¯ä¸ºï¼š" };// ç”¨äºæ˜¾ç¤ºæç¤ºä¿¡æ¯
 
-	// ×Ô¶¨ÒåÑÕÉ«¡¢Éè¶¨×ÖÌåÓë×ÖºÅ¡¢»­±ÊÑÕÉ«
+	// è‡ªå®šä¹‰é¢œè‰²ã€è®¾å®šå­—ä½“ä¸å­—å·ã€ç”»ç¬”é¢œè‰²
 	DefineColor("StatusBarBackground", 0.07, 0.72, 0.96);
 	SetPenColor("StatusBarBackground");
 
-	// Éè¶¨ĞÅÏ¢À¸¸ß¶È
+	// è®¾å®šä¿¡æ¯æ é«˜åº¦
 	StatusBarHeight = GetFontHeight() * 1.3;
 
-	// »æÖÆĞÅÏ¢À¸±³¾°-¾ØĞÎ
+	// ç»˜åˆ¶ä¿¡æ¯æ èƒŒæ™¯-çŸ©å½¢
 	drawRectangle(0, 0, winwidth, StatusBarHeight, 1);
 
 	SetFont("Arial");
 	SetPointSize(12);
 	SetPenColor("White");
 
-	// Ê×ÏÈ»­³öÎÄ¼şÃûÓë±£´æ×´Ì¬
+	// é¦–å…ˆç”»å‡ºæ–‡ä»¶åä¸ä¿å­˜çŠ¶æ€
 	MovePen(TextStringWidth(" "), StatusBarHeight / 2);
-	DrawTextString(PresentLinkStatusInfo->filename);
+	char* temp = PresentLinkStatusInfo->filename,*p=temp;
+	for (; *temp; temp++) {
+		if (*temp == '\\') p = temp+1;
+	}
+	DrawTextString(p);
 	if (!SaveMode) {
 		DrawTextString(" * ");
 	}
 
-	// ¸ù¾İ½á¹¹ÖĞµÄType½øĞĞ·ÖÇé¿ö´¦Àí
+	// æ ¹æ®ç»“æ„ä¸­çš„Typeè¿›è¡Œåˆ†æƒ…å†µå¤„ç†
 	switch (PresentLinkStatusInfo->type) {
-	case 0://Í¼ĞÎ£¨¾ØĞÎ£¬ÁâĞÎ¡¢Ô²½Ç¾ØĞÎ£©£¬ÏÔÊ¾ÖÖÀà¡¢Î»ÖÃ×ø±ê¡¢¿í¶È¸ß¶È¡¢ÑÕÉ«ÏßĞÍ¡¢»­±Ê´óĞ¡ÓëÊÇ·ñÌî³ä
+	case 0://å›¾å½¢ï¼ˆçŸ©å½¢ï¼Œè±å½¢ã€åœ†è§’çŸ©å½¢ï¼‰ï¼Œæ˜¾ç¤ºç§ç±»ã€ä½ç½®åæ ‡ã€å®½åº¦é«˜åº¦ã€é¢œè‰²çº¿å‹ã€ç”»ç¬”å¤§å°ä¸æ˜¯å¦å¡«å……
 		sprintf(PositionX, "%.2f", PresentLinkStatusInfo->PresentObject->cx);
 		sprintf(PositionY, "%.2f", PresentLinkStatusInfo->PresentObject->cy);
 		sprintf(ItemWidth, "%.2f", PresentLinkStatusInfo->PresentObject->width);
 		sprintf(ItemHeight, "%.2f", PresentLinkStatusInfo->PresentObject->height);
 		sprintf(PenSize, "%d", PresentLinkStatusInfo->PresentObject->pensize);
 		DrawTextString(SelectMsg[PresentLinkStatusInfo->PresentObject->n]);
-		DrawTextString("Î»ÖÃ×ø±ê£º( ");
+		DrawTextString("ä½ç½®åæ ‡ï¼š( ");
 		DrawTextString(PositionX);
 		DrawTextString(",");
 		DrawTextString(PositionY);
-		DrawTextString(")  ¿í¶È£º");
+		DrawTextString(")  å®½åº¦ï¼š");
 		DrawTextString(ItemWidth);
-		DrawTextString("  ¸ß¶È£º");
+		DrawTextString("  é«˜åº¦ï¼š");
 		DrawTextString(ItemHeight);
-		DrawTextString("  ÑÕÉ«£º");
+		DrawTextString("  é¢œè‰²ï¼š");
 		DrawTextString(scolor[PresentLinkStatusInfo->PresentObject->color]);
-		DrawTextString("  ÏßĞÍ£º");
+		DrawTextString("  çº¿å‹ï¼š");
 		DrawTextString(DottedOrFull[PresentLinkStatusInfo->PresentObject->frame]);
-		DrawTextString("  »­±Ê´óĞ¡£º");
+		DrawTextString("  ç”»ç¬”å¤§å°ï¼š");
 		DrawTextString(PenSize);
-		DrawTextString("  ÊÇ·ñÌî³ä£º");
+		DrawTextString("  æ˜¯å¦å¡«å……ï¼š");
 		DrawTextString(IfFrameOrFilled[PresentLinkStatusInfo->PresentObject->filled]);
 		break;
-	case 1://Á¬½ÓÏß£¬ÏÔÊ¾ÆğÊ¼×ø±êÓëÖÕÖ¹×ø±ê
-		sprintf(LineBeginX, "%.2f", PresentLinkStatusInfo->PresentObject->cl->begin->bx);
-		sprintf(LineBeginY, "%.2f", PresentLinkStatusInfo->PresentObject->cl->begin->by);
-		sprintf(LineEndX, "%.2f", PresentLinkStatusInfo->PresentObject->cl->end->ex);
-		sprintf(LineEndY, "%.2f", PresentLinkStatusInfo->PresentObject->cl->end->ey);
+	case 1://è¿æ¥çº¿ï¼Œæ˜¾ç¤ºèµ·å§‹åæ ‡ä¸ç»ˆæ­¢åæ ‡
+		sprintf(LineBeginX, "%.2f", PresentLinkStatusInfo->PresentLine->begin->bx);
+		sprintf(LineBeginY, "%.2f", PresentLinkStatusInfo->PresentLine->begin->by);
+		sprintf(LineEndX, "%.2f", PresentLinkStatusInfo->PresentLine->end->ex);
+		sprintf(LineEndY, "%.2f", PresentLinkStatusInfo->PresentLine->end->ey);
 		DrawTextString(SelectMsg[3]);
-		DrawTextString("ÆğÊ¼×ø±ê£º( ");
+		DrawTextString("èµ·å§‹åæ ‡ï¼š( ");
 		DrawTextString(LineBeginX);
 		DrawTextString(",");
 		DrawTextString(LineBeginY);
-		DrawTextString(")  ÖÕÖ¹×ø±ê£º( ");
+		DrawTextString(")  ç»ˆæ­¢åæ ‡ï¼š( ");
 		DrawTextString(LineEndX);
 		DrawTextString(",");
 		DrawTextString(LineEndY);
 		DrawTextString(")");
 		break;
-	case 2://ÎÄ±¾¿ò£¬ÏÔÊ¾Î»ÖÃ×ø±ê¡¢¿í¶È¸ß¶ÈÓëÑÕÉ«×ÖÌå
+	case 2://æ–‡æœ¬æ¡†ï¼Œæ˜¾ç¤ºä½ç½®åæ ‡ã€å®½åº¦é«˜åº¦ä¸é¢œè‰²å­—ä½“
 		sprintf(PositionX, "%.2f", PresentLinkStatusInfo->PresentText->cx);
 		sprintf(PositionY, "%.2f", PresentLinkStatusInfo->PresentText->cy);
 		sprintf(ItemWidth, "%.2f", PresentLinkStatusInfo->PresentText->width);
 		sprintf(ItemHeight, "%.2f", PresentLinkStatusInfo->PresentText->height);
 		DrawTextString(SelectMsg[4]);
-		DrawTextString("Î»ÖÃ×ø±ê£º( ");
+		DrawTextString("ä½ç½®åæ ‡ï¼š( ");
 		DrawTextString(PositionX);
 		DrawTextString(",");
 		DrawTextString(PositionY);
-		DrawTextString(")  ¿í¶È£º");
+		DrawTextString(")  å®½åº¦ï¼š");
 		DrawTextString(ItemWidth);
-		DrawTextString("  ¸ß¶È£º");
+		DrawTextString("  é«˜åº¦ï¼š");
 		DrawTextString(ItemHeight);
-		DrawTextString("  ÑÕÉ«£º");
+		DrawTextString("  é¢œè‰²ï¼š");
 		DrawTextString(scolor[PresentLinkStatusInfo->PresentText->color]);
-		/*DrawTextString("  ×ÖÌå£º");
+		/*DrawTextString("  å­—ä½“ï¼š");
 		DrawTextString(fontstyle[PresentLinkStatusInfo->PresentText->fontstyle]);*/
 		break;
-	case 3:// Î´Ñ¡ÖĞ£¬ÏÔÊ¾Êó±êÎ»ÖÃ
+	case 3:// æœªé€‰ä¸­ï¼Œæ˜¾ç¤ºé¼ æ ‡ä½ç½®
 		sprintf(MouseX, "%.2f", PresentLinkStatusInfo->mouseX);
 		sprintf(MouseY, "%.2f", PresentLinkStatusInfo->mouseY);
-		DrawTextString("| µ±Ç°Î´Ñ¡ÖĞÈÎºÎÔªËØ");
-		DrawTextString(" µ±Ç°Êó±êÎ»ÖÃ£º( ");
+		DrawTextString("| å½“å‰æœªé€‰ä¸­ä»»ä½•å…ƒç´ ");
+		DrawTextString(" å½“å‰é¼ æ ‡ä½ç½®ï¼š( ");
 		DrawTextString(MouseX);
 		DrawTextString(",");
 		DrawTextString(MouseY);
 		DrawTextString(")");
 		break;
-	default:// ²ÎÊı´íÎó£¬ÏÔÊ¾¹ÊÕÏĞÅÏ¢
-		DrawTextString("| ĞÅÏ¢À¸¹ÊÕÏ");
+	default:// å‚æ•°é”™è¯¯ï¼Œæ˜¾ç¤ºæ•…éšœä¿¡æ¯
+		DrawTextString("| ä¿¡æ¯æ æ•…éšœ");
 		break;
 	}
 }
 
 /*
-* º¯ÊıÃû£ºDrawIconButton
-* ½Ó¿Ú£ºDrawIconButton(double winwidth, double winheight)
-* ¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª
-* ÀûÓÃsimpleGUI»æÖÆ½çÃæÓÒ²àµÄÍ¼±ê¹¤¾ßÀ¸£¬ÊµÏÖ³£ÓÃ¹¦ÄÜµÄ¿ì
-* ½İÊ¹ÓÃ¡£ÊµÏÖÔ­Àí²ÉÈ¡ÓëDrawMenuÏàÍ¬µÄ·½·¨£¬¶¼½«²ÎÊı´«Èë
-* FlagSelection£¬·½±ãÍ³Ò»¹ÜÀí£¬Í³Ò»¶Ô½Ó¡£
+* å‡½æ•°åï¼šDrawIconButton
+* æ¥å£ï¼šDrawIconButton(double winwidth, double winheight)
+* â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”
+* åˆ©ç”¨simpleGUIç»˜åˆ¶ç•Œé¢å³ä¾§çš„å›¾æ ‡å·¥å…·æ ï¼Œå®ç°å¸¸ç”¨åŠŸèƒ½çš„å¿«
+* æ·ä½¿ç”¨ã€‚å®ç°åŸç†é‡‡å–ä¸DrawMenuç›¸åŒçš„æ–¹æ³•ï¼Œéƒ½å°†å‚æ•°ä¼ å…¥
+* FlagSelectionï¼Œæ–¹ä¾¿ç»Ÿä¸€ç®¡ç†ï¼Œç»Ÿä¸€å¯¹æ¥ã€‚
 */
 void DrawIconButton(double winwidth, double winheight) {
-	static double IconX, IconY, IconH, IconW;// Í¼±ê°´Å¥µÄÎ»ÖÃ¡¢¸ß¶ÈÓë¿í¶È
-	static double IconButtonInterval = 0.4;// Í¼±ê°´Å¥µÄ´¹Ö±¾àÀë
-	static int	  ButtonSelection[5] = { 0,0,0,0,0 };// ¼ÇÂ¼Ñ¡Ôñ
-	static char* ButtonName[] = {// Í¼±ê°´Å¥µÄÃû×Ö
-		"²åÈë¾ØĞÎ",
-		"²åÈëÁâĞÎ",
-		"²åÈëÔ²½Ç",
-		"Çå¿ÕÒ³Ãæ",
-		"±£´æÎÄ¼ş"
+	static double IconX, IconY, IconH, IconW;// å›¾æ ‡æŒ‰é’®çš„ä½ç½®ã€é«˜åº¦ä¸å®½åº¦
+	static double IconButtonInterval = 0.4;// å›¾æ ‡æŒ‰é’®çš„å‚ç›´è·ç¦»
+	static int	  ButtonSelection[7] = { 0,0,0,0,0,0,0 };// è®°å½•é€‰æ‹©
+	static char* ButtonName[] = {// å›¾æ ‡æŒ‰é’®çš„åå­—
+		"   â–„   ",
+		"   â—†   ",
+		" ï¼ˆã€“ï¼‰ ",
+		"   Ã—   ",
+		"   âˆš   ",
+		"  â€”>  ",
+		"  A  ",
 	};
 
-	// Éè¶¨×ÖÌåÓë×ÖºÅ
-	SetFont("Î¢ÈíÑÅºÚ");
+	// è®¾å®šå­—ä½“ä¸å­—å·
+	SetFont("å¾®è½¯é›…é»‘");
 	SetPointSize(16);
 
-	// È·¶¨Í¼±ê°´Å¥µÄ²ÎÊı
+	// ç¡®å®šå›¾æ ‡æŒ‰é’®çš„å‚æ•°
 	IconX = winwidth * 8 / 9 - TextStringWidth(ButtonName[0]);
 	IconY = winheight * 3 / 4;
 	IconH = GetFontHeight() * 1.5;
 	IconW = TextStringWidth(ButtonName[0]) * 1.2;
 
-	// ×Ô¶¨ÒåÑÕÉ«
+	// è‡ªå®šä¹‰é¢œè‰²
 	DefineColor("ButtonFrameCommon", 0.07, 0.72, 0.96);
 	DefineColor("ButtonFrameHot", 0.20, 0.60, 1.00);
 	setButtonColors("ButtonFrameCommon", "White", "ButtonFrameHot", "White", 1);
 
-	// »æÖÆËÄ¸ö°´Å¥²¢ÇÒ¼ÇÂ¼·µ»ØÖµ
+	// ç»˜åˆ¶ä¸ƒä¸ªæŒ‰é’®å¹¶ä¸”è®°å½•è¿”å›å€¼
+	if (CreateMode == 2) {// è‹¥ä¸å¤„äºå›¾è±¡æ¨¡å¼åˆ™å¤„äºç¦ç”¨çš„ç°è‰²çŠ¶æ€
+		setButtonColors("ButtonFrameCommon", "White", "ButtonFrameHot", "White", 1);
+	}
+	else {
+		setButtonColors("Gray", "White", "Gray", "White", 1);
+	}
 	ButtonSelection[0] = button(GenUIID(0), IconX, IconY, IconW, IconH, ButtonName[0]);
 	ButtonSelection[1] = button(GenUIID(0), IconX, IconY - (IconH + IconButtonInterval), IconW, IconH, ButtonName[1]);
 	ButtonSelection[2] = button(GenUIID(0), IconX, IconY - 2 * (IconH + IconButtonInterval), IconW, IconH, ButtonName[2]);
+	setButtonColors("ButtonFrameCommon", "White", "ButtonFrameHot", "White", 1);
 	ButtonSelection[3] = button(GenUIID(0), IconX, IconY - 3 * (IconH + IconButtonInterval), IconW, IconH, ButtonName[3]);
 	ButtonSelection[4] = button(GenUIID(0), IconX, IconY - 4 * (IconH + IconButtonInterval), IconW, IconH, ButtonName[4]);
+	if (CreateMode == 3) {// è‹¥ä¸å¤„äºè¿çº¿æ¨¡å¼åˆ™å¤„äºç¦ç”¨çš„ç°è‰²çŠ¶æ€
+		setButtonColors("ButtonFrameCommon", "White", "ButtonFrameHot", "White", 1);
+	}
+	else {
+		setButtonColors("Gray", "White", "Gray", "White", 1);
+	}
+	ButtonSelection[5] = button(GenUIID(0), IconX, IconY - 5 * (IconH + IconButtonInterval), IconW, IconH, ButtonName[5]);
+	setButtonColors("ButtonFrameCommon", "White", "ButtonFrameHot", "White", 1);
+	if (CreateMode == 1) {// è‹¥ä¸å¤„äºæ–‡æœ¬æ¨¡å¼åˆ™å¤„äºç¦ç”¨çš„ç°è‰²çŠ¶æ€
+		setButtonColors("ButtonFrameCommon", "White", "ButtonFrameHot", "White", 1);
+	}
+	else {
+		setButtonColors("Gray", "White", "Gray", "White", 1);
+	}
+	ButtonSelection[6] = button(GenUIID(0), IconX, IconY - 6 * (IconH + IconButtonInterval), IconW, IconH, ButtonName[6]);
+	setButtonColors("ButtonFrameCommon", "White", "ButtonFrameHot", "White", 1);
 
-
-	if (ButtonSelection[0] && CreateMode == 2) {// µ±ÇÒ½öµ±·µ»ØÖµ²»Îª0ÇÒ´¦ÓÚÍ¼ĞÎÄ£Ê½£¬²úÉúÏìÓ¦
+	if (ButtonSelection[0] && CreateMode == 2) {// å½“ä¸”ä»…å½“è¿”å›å€¼ä¸ä¸º0ä¸”å¤„äºå›¾å½¢æ¨¡å¼ï¼Œäº§ç”Ÿå“åº”
 		FlagSelection = 51;
 	}
-	if (ButtonSelection[1] && CreateMode == 2) {// µ±ÇÒ½öµ±·µ»ØÖµ²»Îª0ÇÒ´¦ÓÚÍ¼ĞÎÄ£Ê½£¬²úÉúÏìÓ¦
+	if (ButtonSelection[1] && CreateMode == 2) {// å½“ä¸”ä»…å½“è¿”å›å€¼ä¸ä¸º0ä¸”å¤„äºå›¾å½¢æ¨¡å¼ï¼Œäº§ç”Ÿå“åº”
 		FlagSelection = 52;
 	}
-	if (ButtonSelection[2] && CreateMode == 2) {// µ±ÇÒ½öµ±·µ»ØÖµ²»Îª0ÇÒ´¦ÓÚÍ¼ĞÎÄ£Ê½£¬²úÉúÏìÓ¦
+	if (ButtonSelection[2] && CreateMode == 2) {// å½“ä¸”ä»…å½“è¿”å›å€¼ä¸ä¸º0ä¸”å¤„äºå›¾å½¢æ¨¡å¼ï¼Œäº§ç”Ÿå“åº”
 		FlagSelection = 53;
 	}
-	if (ButtonSelection[3]) {// Í¬Ê±¸ü¸ÄÎª×ÔÓÉÄ£Ê½
-		FlagSelection = 16;
+	if (ButtonSelection[3]) {// åŒæ—¶æ›´æ”¹ä¸ºè‡ªç”±æ¨¡å¼
+		FlagSelection = 93;
 		CreateMode = 0;
 	}
-	if (ButtonSelection[4]) {// Í¬Ê±¸ü¸ÄÎª×ÔÓÉÄ£Ê½£¬Éè¶¨±£´æ×´Ì¬Îª1
+	if (ButtonSelection[4]) {// åŒæ—¶æ›´æ”¹ä¸ºè‡ªç”±æ¨¡å¼ï¼Œè®¾å®šä¿å­˜çŠ¶æ€ä¸º1
 		FlagSelection = 13;
 		CreateMode = 0;
 		SaveMode = 1;
+	}
+	if (ButtonSelection[5] && CreateMode == 3) {// å½“ä¸”ä»…å½“è¿”å›å€¼ä¸ä¸º0ä¸”å¤„äºè¿çº¿æ¨¡å¼ï¼Œäº§ç”Ÿå“åº”
+		FlagSelection = 64;
+	}
+	if (ButtonSelection[6] && CreateMode == 1) {// å½“ä¸”ä»…å½“è¿”å›å€¼ä¸ä¸º0ä¸”å¤„äºæ–‡æœ¬æ¨¡å¼ï¼Œäº§ç”Ÿå“åº”
+		FlagSelection = 41;
 	}
 }
 

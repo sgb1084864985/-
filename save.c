@@ -70,15 +70,14 @@
 
 enum __page { StartPage_, SavePage_, DrawPage_, HelpPage_, ExamplePage_, LoadPage_, LastPage_ };
 
-static char labels[2][MaxStrLen] = { "请直接输入文件名（文件存在本地,后缀默认dat）或绝对路径（如\"C:/abc/xx.dat\"）","文件已存在或无法打开！" };
+static char labels[2][MaxStrLen] = { "请直接输入文件名（文件存在本地,后缀默认dat）或绝对路径（如\"C:\\abc\\xx.dat\"）","文件已存在或无法打开！" };
 static char filenames[FileRow][FileLen],Isfolder[FileRow], __address[AddressLen] = "*.*" ;  //filenames用于在打开（加载）界面储存一页的文件名信息，
 															//每一页最大行数为FileRow，每一个文件名长度不超过FileLen；
 															//Isfolder用于记录某行的文件是否是一个文件夹
 
 /*函数接口*/
-int Display_Save(double wholeW, double wholeH, char* filename, Link head, text* thead);
-int Display_Load(double wholeW, double wholeH, Link ptrh, text* ptrth,char* Name);
-
+int Display_Save(double wholeW, double wholeH, char* filename, Link head, text* thead, cline* HeadLine);
+int Display_Load(double wholeW, double wholeH, Link ptrh, text* ptrth, cline* HeadLine, char* Name);
 /*内部函数*/
 static int SetFileNames_(int page, char* relafname, char* baseAddress);
 static void AddressCatch(char* base, char* source);
@@ -96,7 +95,7 @@ static void AddressCatch(char* base, char* source);
  * wholeW和wholeH为窗口大小。
  */
 
-int Display_Save(double wholeW, double wholeH,char* filename,Link head, text* thead) {             //返回0不退出，返回1退出
+int Display_Save(double wholeW, double wholeH,char* filename,Link head, text* thead,cline* HeadLine) {             //返回0不退出，返回1退出
 
 	static char textbuf[FileLen];         //textbuf 为文本框上的文本储存区
 
@@ -125,14 +124,16 @@ int Display_Save(double wholeW, double wholeH,char* filename,Link head, text* th
 	drawLabel(TextBoxX * wholeW, (7 * EmptyLineH + ButtonH) * wholeH, labels[labelmode]);  //显示保存的某种状态
 
 
-	if (button(GenUIID(0), BackButtonX * wholeW, (6*EmptyLineH)*wholeH, ButtonW*wholeW, FileButtonH*wholeH, "返回")) {      //返回
+	if (button(GenUIID(0), BackButtonX * wholeW, (6*EmptyLineH)*wholeH, ButtonW*wholeW, FileButtonH*wholeH, "取消")) {      //返回
 		backflag = 1;
 	}
 
 	if (button(GenUIID(0), SaveButtonX * wholeW, (6*EmptyLineH)*wholeH, ButtonW * wholeW, FileButtonH * wholeH, "保存")) {  //保存
 		
-		if (Save(textbuf,head,thead,GetListLen(head),1))  //如保存成功，则返回
+		if (Save(textbuf, head, thead, HeadLine, GetListLen(head), 1)) {  //如保存成功，则返回
 			backflag = 1;
+			besaved();
+		}
 		else {
 			labelmode = 1; //否则，显示保存失败
 		}
@@ -153,7 +154,7 @@ int Display_Save(double wholeW, double wholeH,char* filename,Link head, text* th
  * 打开后，将文件名传回filename;
  */
 
-int Display_Load(double wholeW, double wholeH, Link ptrh, text* ptrth, char* Name) {
+int Display_Load(double wholeW, double wholeH, Link ptrh, text* ptrth,cline* HeadLine, char* Name) {
 
 	static char textbuf[AddressLen];
 	char tmp[AddressLen];
@@ -216,13 +217,13 @@ int Display_Load(double wholeW, double wholeH, Link ptrh, text* ptrth, char* Nam
 	/*显示当前界面状态*/
 	drawLabel(TextBoxX * wholeW, (1 * EmptyLineH + ButtonH) * wholeH, labels[labelmode]);
 
-	if (button(GenUIID(0), BackButtonX * wholeW, (2 * EmptyLineH) * wholeH, ButtonW * wholeW, FileButtonH * wholeH, "返回")) {  //返回
+	if (button(GenUIID(0), BackButtonX * wholeW, (2 * EmptyLineH) * wholeH, ButtonW * wholeW, FileButtonH * wholeH, "取消")) {  //返回
 		backflag = 1;
 	}
 
 	if (button(GenUIID(0), SaveButtonX * wholeW, (2 * EmptyLineH) * wholeH, ButtonW * wholeW, FileButtonH * wholeH, "打开")) {  //保存
 
-		if (Load(textbuf, ptrh, ptrth)) {
+		if (Load(textbuf, ptrh, ptrth,HeadLine)) {
 			backflag = 1;
 			assert(Name);
 			strcpy(Name, textbuf);    //传回文件名

@@ -105,7 +105,7 @@ void ProgramHelp(double winwidth, double winheight) {
 	// 定义标题与正文字体、字号，为两个间隔赋值
 	SetFont("微软雅黑");
 	SetPointSize(14);
-	Interval[0] = GetFontHeight() / 2;
+	Interval[0] = GetFontHeight() / 3;
 	SetFont("黑体");
 	SetPointSize(18);
 	Interval[1] = GetFontHeight() / 2;
@@ -115,16 +115,16 @@ void ProgramHelp(double winwidth, double winheight) {
 
 	// 绘制标题
 	TextX = TextStringWidth("空格");
-	TextY = winheight - Interval[1] * 3;// 起始位置
+	TextY = winheight - Interval[1] * 2;// 起始位置
 	MovePen(TextX, TextY);
 	SetPenColor("Black");// 标题颜色为黑色
 	for (i = 0; i < 5; i++) {
 		DrawTextString(ProgramHelpTitle[i]);
 		switch (i) {// 一共有5个标题，根据每个标题下的正文内容行数测算得出所需间隔数量
-		case 0:TextY -= (10 * Interval[0] + 3 * Interval[1]); break;
-		case 1:TextY -= (22 * Interval[0] + 3 * Interval[1]); break;
-		case 2:case 3:TextY -= (7 * Interval[0] + 3 * Interval[1]); break;
-		case 4:TextY += (46 * Interval[0] + 10 * Interval[1]); TextX += TextStringWidth("·"); break;// 绘制最后一个标题后，返回正文行首
+		case 0:TextY -= (10 * Interval[0] + 4 * Interval[1]); break;
+		case 1:TextY -= (22 * Interval[0] +6 * Interval[1]); break;
+		case 2:case 3:TextY -= (7 * Interval[0] + 3.5* Interval[1]); break;
+		case 4:TextY += (46 * Interval[0] + 15 * Interval[1]); TextX += TextStringWidth("·"); break;// 绘制最后一个标题后，返回正文行首
 		}
 		MovePen(TextX, TextY);
 	}
@@ -134,11 +134,11 @@ void ProgramHelp(double winwidth, double winheight) {
 	SetPointSize(18);
 	DefineColor("TextBlue", 0.15, 0.25, 0.63);// 自定义墨水蓝
 	SetPenColor("TextBlue");
-	for (i = 0; ProgramHelpText[i] != "END\n"; i++) {
+	for (i = 0; ProgramHelpText[i][0] != 'E'; i++) {
 		if (ProgramHelpText[i] == "\n") {// 行末换行
 			TextY -= Interval[0];
 		}
-		else if (ProgramHelpText[i] == "end\n") {// 段末换行
+		else if (ProgramHelpText[i][0] == 'e') {// 段末换行
 			TextY -= (2 * Interval[0] + 3 * Interval[1]);
 		}
 		else {
@@ -201,11 +201,11 @@ void ShortcutHelp(double winwidth, double winheight) {
 	SetPointSize(18);
 	DefineColor("TextBlue", 0.15, 0.25, 0.63);
 	SetPenColor("TextBlue");
-	for (i = 0; ShortcutText[i] != "END\n"; i++) {
+	for (i = 0; ShortcutText[i][0] != 'E'; i++) {
 		if (ShortcutText[i] == "\n") {// 行末换行
 			TextY -= Interval[0];
 		}
-		else if (ShortcutText[i] == "end\n") {// 段末换行
+		else if (ShortcutText[i][0] == 'e') {// 段末换行
 			TextY -= (2 * Interval[0] + 3 * Interval[1]);
 		}
 		else {
@@ -228,9 +228,9 @@ void AboutHelp(double winwidth, double winheight)
 	// 标题与正文。正文中\n表示一行的结束，end\n表示一段的结束，END\n表示全文的结束
 	char* AboutHelpTitle[] = { "·程序作者\n","·联系方式\n" };
 	char* AboutHelpText[] = {
-		"依互评规则，本段文字于互评阶段暂不予显示",
+		"朱理真 · 颜天明 · 包德政 · 浙江大学 2019级 计算机科学与技术 · 程序设计专题",
 		"end\n",
-		"依互评规则，本段文字于互评阶段暂不予显示",
+		"如有意见与建议，欢迎联系我们：3190105240@zju.edu.cn",
 		"END\n" };
 	double Interval[2], TextX, TextY;// 数组中定义了标题与正文、正文与正文之间的间隔；TextX与TextY用于表示画笔位置
 	int i;// 计数
@@ -265,11 +265,11 @@ void AboutHelp(double winwidth, double winheight)
 	SetPointSize(18);
 	DefineColor("TextBlue", 0.15, 0.25, 0.63);
 	SetPenColor("TextBlue");
-	for (i = 0; AboutHelpText[i] != "END\n"; i++) {
+	for (i = 0; AboutHelpText[i][0] != 'E'; i++) {
 		if (AboutHelpText[i] == "\n") {
 			TextY -= Interval[0];
 		}
-		else if (AboutHelpText[i] == "end\n") {
+		else if (AboutHelpText[i][0] == 'e') {
 			TextY -= (2 * Interval[0] + 3 * Interval[1]);
 		}
 		else {
