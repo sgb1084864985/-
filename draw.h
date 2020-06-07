@@ -82,8 +82,8 @@ typedef struct Line {
 typedef struct ConnectLine {
 	//开始
 	line* begin;
-	//中间
-	line* middle;
+	////中间
+	//line* middle;                //不知何用
 	//结束
 	line* end;
 	//连接线数量
@@ -96,6 +96,8 @@ typedef struct ConnectLine {
 	//起始方向
 	//结束方向
 	int blineangle, elineangle;
+
+	struct ConnectLine* next;
 }cline;
 
 typedef struct graphics {
@@ -117,11 +119,11 @@ typedef struct graphics {
 	int filled;
 	//下一个
 	struct graphics* next;
-	//连接线
-	cline* cl;
-	//连接图形
-	struct graphics* connect;
-}node;
+	////连接线
+	//cline* cl;
+	////连接图形
+	//struct graphics* connect;
+}node, * Link;
 
 typedef struct Textbox {
 	//左上角位置
@@ -158,9 +160,11 @@ void DrawFrame(node* g, int color);
 
 void Drawedge(node *g);
 
+void Lines_Draw(cline* LineHead, cline* CurLine);
+
 double GetAngle(double ax, double ay, double bx, double by);
 
-void Liner(cline *l);
+void Liner(cline *l,cline* CurLine);
 
 int Judge(int dir, line *pre, double x, double y);
 
@@ -170,14 +174,6 @@ void Arrow(int dir, line *pre, double prex, double prey, double x, double y, int
 
 void Fill(node *p);
 
-void DrawButton(double x, double y, int n, int isErase);
-
-void SelectButton(double x, double y, int n, int isDraw);
-
-void DrawCADButton(int button);
-
 void DrawTextEdge(text *t);
-
-void DrawCursor(text *t);
 
 #endif

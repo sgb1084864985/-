@@ -25,6 +25,7 @@ typedef struct tag_StatusInfo {
 	char* filename;
 	node* PresentObject;
 	text* PresentText;
+	cline* PresentLine;
 	int type;	// 0代表图形，1代表连接线，2代表文本框，3代表未选中
 	double mouseX, mouseY;
 }StatusInfo, * LinkStatusInfo;

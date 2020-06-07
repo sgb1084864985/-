@@ -84,15 +84,13 @@ node* Copy(node* p) {
 	pt->width = p->width;
 	pt->height = p->height;
 	pt->angle = p->angle;
-	pt->cx = GetWindowWidth()/2;
-	pt->cy = GetWindowHeight()/2;
-	pt->cl = p->cl;
+	pt->cx = p->cx+0.16;
+	pt->cy = p->cy+0.16;
 	pt->pensize = p->pensize;
 	pt->color = p->color;
 	pt->frame = p->frame;
 	pt->filled = p->filled;
 	pt->angle = 0;
-	pt->connect = NULL;
 	return pt;
 }
 
@@ -110,6 +108,13 @@ void Create(node* head, node* t) {
 	}
 	p->next = t;
 	t->next = NULL;
+}
+
+void AddCline(cline* head, cline* new) {
+	if (head&&new) {
+		new->next = head->next;
+		head->next = new;
+	}
 }
 
 /*
@@ -130,13 +135,11 @@ node* CreateNew(node* prehead, int n) {
 	pt->angle = 0;
 	pt->cx = 4;
 	pt->cy = 3;
-	pt->cl = NULL;
 	pt->pensize = 1;
 	pt->color = black;
 	pt->frame = 0;
 	pt->filled = 0;
 	pt->next = NULL;
-	pt->connect = NULL;
 
 	while (temp->next) {
 		temp = temp->next;
@@ -234,19 +237,19 @@ int JudgeEdge(node* p, double x, double y) {
 	if (p == NULL)return 0;
 	//根据不同位置返回不同方向
 	double w = p->width / 2, h = p->height / 2;
-	if (InArc(p->cx, p->cy, x, y, 0.06, p->angle, w + 0.09)) {
+	if (InArc(p->cx, p->cy, x, y, .4, p->angle, w + 0.06)) { //原w+0.06,以下二均是
 		//右方向
 		return right;
 	}
-	if (InArc(p->cx, p->cy, x, y, 0.06, p->angle + 180, w + 0.09)) {
+	if (InArc(p->cx, p->cy, x, y, .4, p->angle + 180, w + 0.09)) {
 		//左方向
 		return left;
 	}
-	if (InArc(p->cx, p->cy, x, y, 0.06, p->angle + 270, h + 0.09)) {
+	if (InArc(p->cx, p->cy, x, y, .4, p->angle + 270, h + 0.09)) {
 		//下方向
 		return down;
 	}
-	if (InArc(p->cx, p->cy, x, y, 0.08, p->angle + 90, h + 0.15)) {
+	if (InArc(p->cx, p->cy, x, y, .5, p->angle + 90, h + 0.08)) {  //原h+0.15
 		//上方向
 		return ROTATE;
 	}
@@ -260,81 +263,6 @@ int JudgeEdge(node* p, double x, double y) {
  * -------------------------------------------------
  * 更新连接线
  */
-void updateline(node* p) {
-	if (p->cl) {
-		double a, x, y, w = p->width / 2 + 0.12, h = p->height / 2 + 0.12;
-
-		//如果是连接线的末端，则从后向前更新
-		if (p->connect) {
-			//根据连接线的不同方向更新
-			//计算距离
-			if (p->cl->elineangle == right) {
-				a = p->angle / 180 * pi;
-				x = w * cos(a) + p->cx;
-				y = w * sin(a) + p->cy;
-			}
-			if (p->cl->elineangle == down) {
-				a = (p->angle + 270) / 180 * pi;
-				x = h * cos(a) + p->cx;
-				y = h * sin(a) + p->cy;
-			}
-			if (p->cl->elineangle == left) {
-				a = (p->angle + 180) / 180 * pi;
-				x = w * cos(a) + p->cx;
-				y = w * sin(a) + p->cy;
-			}
-			//末尾位置改变
-			p->cl->end->ex = x;
-			p->cl->end->ey = y;
-			if (p->cl->end->before) {
-				//前一个节点相应改变
-				if (p->cl->end->dir == xaxs) {
-					p->cl->end->by = y;
-					p->cl->end->before->ey = y;
-				}
-				else {
-					//最终位置
-					p->cl->end->bx = x;
-					p->cl->end->before->ex = x;
-				}
-			}
-		}
-		else {
-			//根据连接线的不同方向更新
-			//计算距离
-			if (p->cl->blineangle == right) {
-				a = p->angle / 180 * pi;
-				x = w * cos(a) + p->cx;
-				y = w * sin(a) + p->cy;
-			}
-			if (p->cl->blineangle == down) {
-				a = (p->angle + 270) / 180 * pi;
-				x = h * cos(a) + p->cx;
-				y = h * sin(a) + p->cy;
-			}
-			if (p->cl->blineangle == left) {
-				a = (p->angle + 180) / 180 * pi;
-				x = w * cos(a) + p->cx;
-				y = w * sin(a) + p->cy;
-			}
-			//初始位置改变
-			p->cl->begin->bx = x;
-			p->cl->begin->by = y;
-			if (p->cl->begin->next) {
-				if (p->cl->begin->dir == xaxs) {
-					//后一个节点相应改变
-					p->cl->begin->ey = y;
-					p->cl->begin->next->by = y;
-				}
-				else {
-					//最终位置
-					p->cl->begin->ex = x;
-					p->cl->begin->next->bx = x;
-				}
-			}
-		}
-	}
-}
 
 /*
  * 函数名: DrawList
@@ -354,11 +282,18 @@ void DrawList(node* head) {
 		}
 		else Draw(p, 1);//画图形
 
-		//更新连接线
-		updateline(p);
-		//画连接线
-		Liner(p->cl);
 		p = p->next;
+	}
+}
+
+void MoveWholeLine(cline* LineHead, double dx, double dy) {
+	line* temp = LineHead->begin;
+	while (temp) {
+		temp->bx += dx;
+		temp->ex += dx;
+		temp->by += dy;
+		temp->ey += dy;
+		temp = temp->next;
 	}
 }
 
@@ -388,11 +323,11 @@ void Converse(cline *t, cline *p) {
  * -------------------------------------------------
  * 遍历链表搜寻选中连接线
  */
-node* TrvealLine(node* prehead, double x, double y) {
-	node* temp = prehead->next;
+cline* TrvealLine(cline* LineHead, double x, double y) {
+	cline* temp = LineHead->next;
 	//遍历链表
 	while (temp) {
-		if (Trveal(temp->cl, x, y)) {
+		if (Trveal(temp, x, y)) {
 			//返回当前相连的图形
 			return temp;
 		}
@@ -457,58 +392,25 @@ void ZoomLine(line* l, double x, double y) {
  * -------------------------------------------------
  * 寻找选中缩放连接线
  */
-node* SearchLine(node* prehead, double x, double y) {
-	node* temp = prehead->next;
+cline* SearchLine(cline* LineHead, double x, double y) {
+	cline* temp = LineHead->next;
 	while (temp) {
-		//判断是连接先后
-		if (temp->connect == NULL && temp->cl) {
-			line* l = temp->cl->end;
-			//x方向
-			if (l->dir == xaxs) {
-				//判断是否选中
-				if (l->ex > l->bx && InArc(l->ex + 0.05, l->ey, x, y, 0.06, 0, 0)) {
-					return temp;
-				}
-				else {
-					if (InArc(l->ex - 0.05, l->ey, x, y, 0.06, 0, 0))
-						//返回结构体
-						return temp;
-				}
-			}
-			//y方向
-			else {
-				//判断是选中
-				if (l->ey < l->by && InArc(l->ex, l->ey - 0.05, x, y, 0.06, 0, 0)) {
-					return temp;
-				}
-				else {
-					if (InArc(l->ex, l->ey + 0.05, x, y, 0.06, 0, 0))
-						//返回结构体
-						return temp;
-				}
-			}
+		line* l = temp->end;
+		//判断是选中
+		if (/*l->ey < l->by &&*/ InArc(l->ex, l->ey , x, y, 0.2, 0, 0)) {  //改
+			return temp;
 		}
+		//else {
+		//	if (InArc(l->ex, l->ey + 0.05, x, y, 0.06, 0, 0))
+		//		//返回结构体
+		//		return temp;
+		//}
+
 		temp = temp->next;
 	}
 	return NULL;
 }
 
-void JudgeConnect(node *prehead, node *p) {
-	if (p->cl == NULL)return ;
-	node *t = prehead->next;
-	double x = p->cl->end->ex, y = p->cl->end->ey;
-	while (t) {
-		int a = JudgeEdge(t, x, y);
-		if (a == left || a == down || a == right) {
-			if (t != p) {
-				t->connect = p;
-				t->cl = p->cl;
-				p->cl->elineangle = a;
-			}
-		}
-		t = t->next;
-	}
-}
 
 //————————————————————————————————处理函数（计算，检测……）
 /*
@@ -754,7 +656,6 @@ void DisplayText(text* pretext, text* tt) {
  */
 void DrawString(text* t) {
 	//设置当前字体颜色
-	SetFont(fontstyle[t->fontstyle]);
 	SetPenColor(scolor[t->color]);
 
 	int k = 1, j = 0, i = 0, flag = 0;
@@ -902,4 +803,71 @@ void DeleteChar(text* t) {
 	}
 	//末尾补0
 	t->s[l] = 0;
+}
+
+
+text* CopyText(text* t) {
+	text* pt = (text*)malloc(sizeof(text));
+	pt->blink = 0;
+	pt->color =t->color;
+	pt->show = 0;
+	pt->cx = t->cx + 0.16;
+	pt->cy = t->cy - 0.16;
+	pt->fontstyle = t->fontstyle;
+	pt->width = t->width;
+	pt->height = t->height;
+	pt->linenum = t->linenum;
+	strcpy(pt->s, t->s);
+	pt->position = strlen(t->s) - 1;
+	pt->precolor = t->precolor;
+	pt->next = NULL;
+	return pt;
+}
+
+void PasteText(text* pretext, text* t) {
+	text* temp = pretext;
+	while (temp->next) {
+		temp = temp->next;
+	}
+	temp->next = t;
+	t->next = NULL;
+}
+
+cline* CopyLine(cline* l) {
+	if (!l) return NULL;
+	cline* newone = (cline*)malloc(sizeof(cline));
+	assert(newone);
+	*newone = *l;
+
+	line* last = NULL, * p = NULL,*lp=l->begin;
+
+	newone->begin = NULL;
+
+	for (int j = 0; j < newone->num; j++) {
+		p = (struct Line*)malloc(sizeof(struct Line));
+		assert(p);
+
+		*p = *lp;
+
+		p->bx += 0.16;
+		p->by += 0.16;
+		p->ex += 0.16;
+		p->ey += 0.16;
+
+		if (j == 0) newone->begin = p;
+
+		if (last)  last->next = p;
+
+		p->before = last;
+
+		last = p;
+		lp = lp->next;
+	}
+
+	if (last) last->next = NULL;
+
+	newone->end = last;
+	newone->next = NULL;
+
+	return newone;
 }

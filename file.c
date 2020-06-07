@@ -25,15 +25,14 @@ typedef node* Link;
 
 /*函数接口*/
 
-status Save(char* filename, Link head, text* thead, int len, int SaveCopyAs);  //保存函数，参数分别为：文件名，主链表头指针，文本链表头指针，链表长度
-
-status Load(char* filename, Link ptrh, text* ptrth);			//读取函数，参数分别为：文件名，指向主链表头指针的指针，指向文本链表头指针的指针
+status Save(char* filename, Link head, text* thead, cline* LineHead, int len, int SaveCopyAs); //保存函数，参数分别为：文件名，主链表头指针，文本链表头指针，链表长度
+status Load(char* filename, Link ptrh, text* ptrth, cline* LineHead);	//读取函数，参数分别为：文件名，指向主链表头指针的指针，指向文本链表头指针的指针
 
 int GetListLen(Link head);                                     //返回链表的长度
 
-void Close(Link head, text* texthead);                         //破坏链表后退出程序
+void Close(Link head, text* texthead,cline* HeadLine);                         //破坏链表后退出程序
 
-void _Destroy(Link head, text* texthead);                     //破坏链表
+void _Destroy(Link head, text* texthead, cline* LineHead);  //破坏链表
 
 void CLine_Destroy(cline* cl);
 
@@ -50,6 +49,12 @@ static void SaveMainChain(FILE* fp, Link head);
 static void SaveLine(FILE* fp, struct ConnectLine* cline);
 
 static text* LoadTBox(FILE* fp);
+
+void AllLines_Destroy(cline* head);
+
+static void AllLines_Save(FILE* fp, cline* head);
+
+static cline* AllLines_Load(FILE* fp);
 
 static struct ConnectLine* LoadLine(fp);
 
@@ -77,13 +82,13 @@ static Link LoadMainChain(FILE* fp, int ListLen);
  * 若保存成功，将返回true。
  */
 
-status Save(char* filename, Link head, text* thead, int len,int SaveCopyAs) {
+status Save(char* filename, Link head, text* thead, cline* LineHead, int len, int SaveCopyAs) {
 	if (len == 0) return true;
 	if (head && thead && filename) {
 
 		FILE* fp;
 
-		if (SaveCopyAs && (fp = fopen(filename, "rb")) != NULL){
+		if (SaveCopyAs && (fp = fopen(filename, "rb")) != NULL) {
 			fclose(fp);
 			return false;
 		}
@@ -96,6 +101,7 @@ status Save(char* filename, Link head, text* thead, int len,int SaveCopyAs) {
 
 		SaveMainChain(fp, head);
 		SaveTBox(fp, thead);
+		AllLines_Save(fp, LineHead);
 
 		fclose(fp);
 		return true;
@@ -167,7 +173,6 @@ static void SaveMainChain(FILE* fp, Link head) {
 		Link p = head->next;
 		while (p != NULL) {
 			fwrite(p, sizeof(*p), 1, fp);
-			if (p->cl) SaveLine(fp, p->cl);
 			p = p->next;
 		}
 	}
@@ -188,7 +193,7 @@ static void SaveMainChain(FILE* fp, Link head) {
  * 载失败，将返回false.
  */
 
-status Load(char* filename, Link ptrh, text* ptrth) {  //ptrh 指向主链表头指针，ptrth指向文本框链表的头指针
+status Load(char* filename, Link ptrh, text* ptrth, cline* LineHead) {
 
 	int ListLen;
 
@@ -203,6 +208,8 @@ status Load(char* filename, Link ptrh, text* ptrth) {  //ptrh 指向主链表头指针，
 	ptrh->next = LoadMainChain(fp, ListLen);
 
 	ptrth->next = LoadTBox(fp);
+
+	LineHead->next = AllLines_Load(fp);
 
 	fclose(fp);
 	return true;
@@ -221,7 +228,7 @@ status Load(char* filename, Link ptrh, text* ptrth) {  //ptrh 指向主链表头指针，
  */
 
 static Link LoadMainChain(FILE* fp, int ListLen) {
-	Link last = NULL, head = NULL,result=NULL;
+	Link last = NULL, head = NULL, result = NULL;
 
 	for (int j = 0; j < ListLen; j++) {
 		assert(head = (Link)malloc(sizeof(*head)));
@@ -234,10 +241,9 @@ static Link LoadMainChain(FILE* fp, int ListLen) {
 
 		last = head;
 
-		if(head->cl) head->cl = LoadLine(fp);
 	}
 
-	if(last) last->next = NULL;
+	if (last) last->next = NULL;
 
 	return result;
 }
@@ -337,11 +343,11 @@ static text* LoadTBox(FILE* fp) {
  * 头指针不会被释放。
  */
 
-void _Destroy(Link head, text* texthead) {
+void _Destroy(Link head, text* texthead, cline* LineHead) {
 	MainChain_Destroy(head);
 	TextBox_Destroy(texthead);
+	AllLines_Destroy(LineHead);
 }
-
 /*
  * 函数名: MainChain_Destroy
  * 接口: MainChain_Destroy(head);
@@ -360,14 +366,12 @@ static void MainChain_Destroy(Link head) {
 		head = head->next;
 		while (head) {
 			tmp = head;
-			if (head->cl) CLine_Destroy(head->cl);
 			head = head->next;
 			free(tmp);
 		}
 		h->next = NULL;
 	}
 }
-
 /*
  * 函数名: CLine_Destroy
  * 接口: CLine_Destroy(cl)
@@ -423,10 +427,11 @@ static void TextBox_Destroy(text* head) {
  * 后退出程序。
  */
 
-void Close( Link head, text* texthead) {
-	_Destroy(head,texthead);
+void Close( Link head, text* texthead,cline* LineHead) {
+	_Destroy(head,texthead,LineHead);
 	free(head);
 	free(texthead);
+	free(LineHead);
 	ExitGraphics();
 }
 
@@ -448,4 +453,59 @@ int GetListLen(Link head) {
 		i++;
 	}
 	return i;
+}
+
+void AllLines_Destroy(cline* head) {
+	cline* temp = head->next,*p;
+	while (temp) {
+		p = temp->next;
+		CLine_Destroy(temp);
+		temp = p;
+	}
+	head->next = NULL;
+}
+
+static void AllLines_Save(FILE* fp, cline* head) {
+	cline* p = head->next;
+
+	int len = 0;					   //len 用于记录链表长度
+
+	long pos = ftell(fp), endpos;		//用pos记录开始位置
+
+	fwrite(&len, sizeof(int), 1, fp);  //先写入占据储存位置
+
+	while (p != NULL) {
+		SaveLine(fp, p);
+		p = p->next;
+		len++;                         //得到长度
+	}
+
+	endpos = ftell(fp);
+	fseek(fp, pos, SEEK_SET);            //跳到开头处
+	fwrite(&len, sizeof(int), 1, fp);    //写入长度
+	fseek(fp, endpos, SEEK_SET);         //跳回末尾
+}
+
+static cline* AllLines_Load(FILE* fp) {
+	cline* last = NULL, * head = NULL, * p = NULL;
+
+	int ListLen;
+	fread(&ListLen, sizeof(int), 1, fp);
+	if (ListLen == 0) return NULL;
+
+
+	for (int j = 0; j < ListLen; j++) {
+
+		p = LoadLine(fp);
+
+		if (j == 0) head = p;
+
+		if (last) last->next = p;
+
+		last = p;
+	}
+
+	if (last) last->next = NULL;
+
+	return head;
 }
